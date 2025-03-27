@@ -1,0 +1,23 @@
+{
+  "name": "ajjscript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShirvanyanKaren/AJJScript.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ShirvanyanKaren/AJJScript/issues"
+  },
+  "homepage": "https://github.com/ShirvanyanKaren/AJJScript#readme",
+  "dependencies": {
+    "jest": "^29.7.0"
+  }
+}
