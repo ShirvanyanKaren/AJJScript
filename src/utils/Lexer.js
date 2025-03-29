@@ -56,3 +56,36 @@ const {
     BooleanTypeToken,
     ClassNameTypeToken,
   } = require("../lexer/tokens/TypeTokens");
+
+  const keywordMap = {
+    // Access modifiers
+    public: PublicToken,
+    private: PrivateToken,
+    protected: ProtectedToken,
+  
+    // Special
+    this: ThisToken,
+    extends: ExtendToken,
+    constructor: ConstructorToken,
+    method: MethodToken,
+  
+    // Types
+    int: IntegerTypeToken,
+    string: StringTypeToken,
+    boolean: BooleanTypeToken,
+    void: VoidTypeToken,
+  
+    // Expressions / Control
+    true: TrueToken,
+    false: FalseToken,
+    if: IfToken,
+    else: ElseToken,
+    while: WhileToken,
+    break: BreakToken,
+    return: ReturnToken,
+    class: ClassToken,
+    println: PrintToken,
+    new: NewToken,
+    super: SuperToken,
+    init: ConstructorToken,
+  };
