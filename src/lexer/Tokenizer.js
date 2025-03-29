@@ -39,19 +39,35 @@ class Tokenizer {
       return token;
     }
 
-    if (/[_a-zA-Z]/.test(char)) 
-        return this.tokenizeWord();
-    if (/[a-zA-Z]/.test(char)) 
-        return this.tokenizeNumber();
-    if (char === '"') 
-        return this.tokenizeString();
+    if (/[_a-zA-Z]/.test(char)) return this.tokenizeWord();
+    if (/[a-zA-Z]/.test(char)) return this.tokenizeNumber();
+    if (char === '"') return this.tokenizeString();
 
     return this.tokenizeSymbol();
   }
 
-  tokenizeSymbol() {}
+  tokenizeSymbol() {
+    const twoChar = this.input.slice(this.offset, this.offset + 2);
+    const oneChar = this.input[this.offset];
+
+    if (multiCharSymbolMap[twoChar]) {
+      this.offset += 2;
+      return new multiCharSymbolMap[twoChar]();
+    }
+
+    if (symbolMap[oneChar]) {
+      this.offset++;
+      return new symbolMap[oneChar]();
+    }
+
+    throw new Error(`Unexpected token at position ${this.offset}: ${oneChar}`);
+  }
 
   tokenizeWord() {}
+
+  tokenizeNumber() {}
+
+  tokenizeString() {}
 
   skipWhiteSpace() {
     while (
