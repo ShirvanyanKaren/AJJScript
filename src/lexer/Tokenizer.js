@@ -63,7 +63,40 @@ class Tokenizer {
     throw new Error(`Unexpected token at position ${this.offset}: ${oneChar}`);
   }
 
-  tokenizeWord() {}
+  tokenizeWord() {
+    let name = "";
+
+    // Read the entire word
+    while (
+      this.offset < this.input.length &&
+      this.isLetterOrDigit(this.input[this.offset])
+    ) {
+      name += this.input[this.offset++];
+    }
+
+    // Keywords
+    const TokenClass = keywordMap[name];
+    if (TokenClass) return new TokenClass();
+
+    // Method-like tokens (e.g. println, user-defined methods)
+    if (this.offset < this.input.length && this.input[this.offset] === "(") {
+      return new MethodNameToken(name);
+    }
+
+    // Class name contexts
+    const prev = this.tokens[this.tokens.length - 1];
+    if (
+      prev instanceof ClassToken ||
+      prev instanceof NewToken ||
+      prev instanceof ColonToken ||
+      prev instanceof ExtendToken
+    ) {
+      return new ClassNameTypeToken(name);
+    }
+    
+
+    return new VariableToken(name);
+  }
 
   tokenizeNumber() {}
 
