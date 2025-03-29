@@ -174,3 +174,30 @@ describe("Keywords and Literals", () => {
     ]);
   });
 });
+
+describe("Print Method", () => {
+  test("Println method should be recognized as a method call", () => {
+    expectTokenizes('println("Hello, World!");', [
+      new PrintToken(),
+      new LeftParenToken(),
+      new StringToken("Hello, World!"),
+      new RightParenToken(),
+      new SemiColonToken(),
+    ]);
+  });
+});
+
+describe("Expressions and Operators", () => {
+  test("Complex expression with operators", () => {
+    expectTokenizes("(4 + 5) * 3;", [
+      new LeftParenToken(),
+      new IntegerToken(4),
+      new PlusToken(),
+      new IntegerToken(5),
+      new RightParenToken(),
+      new MultiplyToken(),
+      new IntegerToken(3),
+      new SemiColonToken(),
+    ]);
+  });
+});
