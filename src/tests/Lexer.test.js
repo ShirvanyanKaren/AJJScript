@@ -52,7 +52,7 @@ const {
   MethodNameToken,
   ConstructorToken,
   ExtendToken,
-  MethodToken
+  MethodToken,
 } = require("../lexer/tokens/SpecialTokens");
 const {
   PublicToken,
@@ -61,4 +61,26 @@ const {
   AccessToken,
 } = require("../lexer/tokens/AccessTokens");
 
+describe("Numeric Handling", () => {
+  test("Valid integer parsing", () => {
+    expectTokenizes("123", [new IntegerToken(123)]);
+  });
+  test("Valid negative integer parsing", () => {
+    expectTokenizes("-123", [new IntegerToken(-123)]);
+  });
+});
 
+describe("Type Handling", () => {
+  test("Assignment for IntegerTypeToken", () => {
+    expectTokenizes("int", [new IntegerTypeToken()]);
+  });
+  test("Assignment for StringTypeToken", () => {
+    expectTokenizes("string", [new StringTypeToken()]);
+  });
+  test("Assignment for BooleanTypeToken", () => {
+    expectTokenizes("boolean", [new BooleanTypeToken()]);
+  });
+  test("Assignment for VoidTypeToken", () => {
+    expectTokenizes("void", [new VoidTypeToken()]);
+  });
+});
