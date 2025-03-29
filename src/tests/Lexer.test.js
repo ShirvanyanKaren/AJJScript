@@ -136,68 +136,186 @@ describe("Tokenizer Tests", () => {
       expectTokenizes("<", [new LessThanToken()]);
     });
   });
-});
 
-describe("Basic Tokens", () => {
-  test("Empty input should return no tokens", () => {
-    expectTokenizes("", []);
+  describe("Basic Tokens", () => {
+    test("Empty input should return no tokens", () => {
+      expectTokenizes("", []);
+    });
+
+    test("Basic symbols", () => {
+      expectTokenizes("{}();", [
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new SemiColonToken(),
+      ]);
+    });
   });
 
-  test("Basic symbols", () => {
-    expectTokenizes("{}();", [
-      new LeftCurlyToken(),
-      new RightCurlyToken(),
-      new LeftParenToken(),
-      new RightParenToken(),
-      new SemiColonToken(),
-    ]);
-  });
-});
+  describe("Keywords and Literals", () => {
+    test("Boolean literals", () => {
+      expectTokenizes("if (false) {}", [
+        new IfToken(),
+        new LeftParenToken(),
+        new FalseToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
 
-describe("Keywords and Literals", () => {
-  test("Boolean literals", () => {
-    expectTokenizes("if (false) {}", [
-      new IfToken(),
-      new LeftParenToken(),
-      new FalseToken(),
-      new RightParenToken(),
-      new LeftCurlyToken(),
-      new RightCurlyToken(),
-    ]);
+    test("String literals", () => {
+      expectTokenizes(`return \"Hello, World!\";`, [
+        new ReturnToken(),
+        new StringToken("Hello, World!"),
+        new SemiColonToken(),
+      ]);
+    });
   });
 
-  test("String literals", () => {
-    expectTokenizes(`return \"Hello, World!\";`, [
-      new ReturnToken(),
-      new StringToken("Hello, World!"),
-      new SemiColonToken(),
-    ]);
+  describe("Print Method", () => {
+    test("Println method should be recognized as a method call", () => {
+      expectTokenizes('println("Hello, World!");', [
+        new PrintToken(),
+        new LeftParenToken(),
+        new StringToken("Hello, World!"),
+        new RightParenToken(),
+        new SemiColonToken(),
+      ]);
+    });
   });
-});
 
-describe("Print Method", () => {
-  test("Println method should be recognized as a method call", () => {
-    expectTokenizes('println("Hello, World!");', [
-      new PrintToken(),
-      new LeftParenToken(),
-      new StringToken("Hello, World!"),
-      new RightParenToken(),
-      new SemiColonToken(),
-    ]);
+  describe("Expressions and Operators", () => {
+    test("Complex expression with operators", () => {
+      expectTokenizes("(4 + 5) * 3;", [
+        new LeftParenToken(),
+        new IntegerToken(4),
+        new PlusToken(),
+        new IntegerToken(5),
+        new RightParenToken(),
+        new MultiplyToken(),
+        new IntegerToken(3),
+        new SemiColonToken(),
+      ]);
+    });
   });
-});
 
-describe("Expressions and Operators", () => {
-  test("Complex expression with operators", () => {
-    expectTokenizes("(4 + 5) * 3;", [
-      new LeftParenToken(),
-      new IntegerToken(4),
-      new PlusToken(),
-      new IntegerToken(5),
-      new RightParenToken(),
-      new MultiplyToken(),
-      new IntegerToken(3),
-      new SemiColonToken(),
-    ]);
+  describe("Classes and Methods", () => {
+    test("Class declaration", () => {
+      expectTokenizes("class Test {}", [
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+
+    test("Method inside a class", () => {
+      expectTokenizes(`class Test { method returnScore() { return 1; } }`, [
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new MethodToken(),
+        new MethodNameToken("returnScore"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new ReturnToken(),
+        new IntegerToken(1),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
   });
+
+  describe("Other keywords", () => {
+    test("return keyword", () => {
+      expectTokenizes("return 1;", [
+        new ReturnToken(),
+        new IntegerToken(1),
+        new SemiColonToken(),
+      ]);
+    });
+  });
+
+  describe("Classes and Access Modifiers", () => {
+    test("Protected ", () => {
+      expectTokenizes("protected class Test {}", [
+        new ProtectedToken(),
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+    test("Private ", () => {
+      expectTokenizes("private class Test {}", [
+        new PrivateToken(),
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+    test("Public ", () => {
+      expectTokenizes("public class Test {}", [
+        new PublicToken(),
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+    test("Class declaration and extension", () => {
+      expectTokenizes("class Test extends Exam {}", [
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new ExtendToken(),
+        new ClassNameTypeToken("Exam"),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+    test("Class declaration with constructor", () => {
+      expectTokenizes("class Test { constructor() {} }", [
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+    test("Class declaration with assingment of this.", () => {
+      expectTokenizes("class Test { this.var = 10; }", [
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new ThisToken(),
+        new DotToken(),
+        new VariableToken("var"),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+    test("Class declaration with access tokens", () => {
+      expectTokenizes("public class Test {}", [
+        new PublicToken(),
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+  });
+ 
+
+
 });
