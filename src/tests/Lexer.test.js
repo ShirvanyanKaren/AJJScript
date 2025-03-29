@@ -315,7 +315,128 @@ describe("Tokenizer Tests", () => {
       ]);
     });
   });
- 
 
+  describe("Class Hierarchy Structure", () => {
+    test("Tokenize class Animal with method and constructor", () => {
+      expectTokenizes(
+        `
+        public class Animal {
+          init() {}
+          method speak() void { return println(0); }
+        }
+      `,
+        [
+          new PublicToken(),
+          new ClassToken(),
+          new ClassNameTypeToken("Animal"),
+          new LeftCurlyToken(),
+          new ConstructorToken(),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new LeftCurlyToken(),
+          new RightCurlyToken(),
+          new MethodToken(),
+          new MethodNameToken("speak"),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new VoidTypeToken(),
+          new LeftCurlyToken(),
+          new ReturnToken(),
+          new PrintToken(),
+          new LeftParenToken(),
+          new IntegerToken(0),
+          new RightParenToken(),
+          new SemiColonToken(),
+          new RightCurlyToken(),
+          new RightCurlyToken(),
+        ],
+      );
+    });
 
+    test("Tokenize class Cat extending Animal", () => {
+      expectTokenizes(
+        `
+        public class Cat extends Animal {
+          init() { super(); }
+          method speak() void { return println(1); }
+        }
+      `,
+        [
+          new PublicToken(),
+          new ClassToken(),
+          new ClassNameTypeToken("Cat"),
+          new ExtendToken(),
+          new ClassNameTypeToken("Animal"),
+          new LeftCurlyToken(),
+          new ConstructorToken(),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new LeftCurlyToken(),
+          new SuperToken(),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new SemiColonToken(),
+          new RightCurlyToken(),
+          new MethodToken(),
+          new MethodNameToken("speak"),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new VoidTypeToken(),
+          new LeftCurlyToken(),
+          new ReturnToken(),
+          new PrintToken(),
+          new LeftParenToken(),
+          new IntegerToken(1),
+          new RightParenToken(),
+          new SemiColonToken(),
+          new RightCurlyToken(),
+          new RightCurlyToken(),
+        ],
+      );
+    });
+
+    test("Tokenize class Dog extending Animal", () => {
+      expectTokenizes(
+        `
+        public class Dog extends Animal {
+          init() { super(); }
+          method speak() void { return println(2); }
+        }
+      `,
+        [
+          new PublicToken(),
+          new ClassToken(),
+          new ClassNameTypeToken("Dog"),
+          new ExtendToken(),
+          new ClassNameTypeToken("Animal"),
+          new LeftCurlyToken(),
+          new ConstructorToken(),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new LeftCurlyToken(),
+          new SuperToken(),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new SemiColonToken(),
+          new RightCurlyToken(),
+          new MethodToken(),
+          new MethodNameToken("speak"),
+          new LeftParenToken(),
+          new RightParenToken(),
+          new VoidTypeToken(),
+          new LeftCurlyToken(),
+          new ReturnToken(),
+          new PrintToken(),
+          new LeftParenToken(),
+          new IntegerToken(2),
+          new RightParenToken(),
+          new SemiColonToken(),
+          new RightCurlyToken(),
+          new RightCurlyToken(),
+        ],
+      );
+    });
+  });
+
+  
 });
