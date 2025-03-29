@@ -29,7 +29,7 @@ class Tokenizer {
     this.skipWhiteSpace();
     // End of input
     if (this.offset >= this.input.length) return null;
-    
+
     const char = this.input[this.offset];
     const next = this.input[this.offset + 1];
 
@@ -48,15 +48,15 @@ class Tokenizer {
   }
 
   tokenizeSymbol() {
-      const twoChar = this.input.slice(this.offset, this.offset + 2);
-      const oneChar = this.input[this.offset];
-      
+    const twoChar = this.input.slice(this.offset, this.offset + 2);
+    const oneChar = this.input[this.offset];
+
     // Multi-character symbols
     if (multiCharSymbolMap[twoChar]) {
-        this.offset += 2;
-        return new multiCharSymbolMap[twoChar]();
+      this.offset += 2;
+      return new multiCharSymbolMap[twoChar]();
     }
-        
+
     // Single-character symbols
     if (symbolMap[oneChar]) {
       this.offset++;
@@ -96,15 +96,43 @@ class Tokenizer {
     ) {
       return new ClassNameTypeToken(name);
     }
-    
 
     return new VariableToken(name);
   }
 
-  tokenizeNumber() {}
+  tokenizeNumber() {
+    let number = "";
+    while (
+      this.offset < this.input.length &&
+      this.isDigit(this.input[this.offset])
+    ) {
+      number += this.input[this.offset++];
+    }
 
-  tokenizeString() {}
+    if (number === "") {
+      throw new Error(`Invalid number at position ${this.offset}`);
+    }
 
+    return new IntegerToken(parseInt(number, 10));
+  }
+
+  tokenizeString() {
+    let result = "";
+    this.offset++; 
+
+    while (this.offset < this.input.length) {
+      const char = this.input[this.offset];
+      if (char === '"') {
+        this.offset++; 
+        return new StringToken(result);
+      }
+      result += char;
+      this.offset++;
+    }
+
+    throw new Error("Unterminated string literal");
+  }
+  
   skipWhiteSpace() {
     while (
       this.offset < this.input.length &&
