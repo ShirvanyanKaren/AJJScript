@@ -16,3 +16,24 @@ const {
     ExtendToken,
   } = require("./tokens/SpecialTokens");
   const { keywordMap, symbolMap, multiCharSymbolMap } = require("../utils/Lexer");
+
+  class Tokenizer {
+    constructor(input) {
+      this.input = input;
+      this.offset = 0;
+      this.tokens = [];
+    }
+
+    tokenizeAll() {
+
+    }
+
+    nextToken() {
+
+    }
+    skipWhiteSpace() {
+
+    }
+
+
+}
