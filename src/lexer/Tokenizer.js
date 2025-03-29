@@ -27,8 +27,9 @@ class Tokenizer {
 
   nextToken() {
     this.skipWhiteSpace();
+    // End of input
     if (this.offset >= this.input.length) return null;
-
+    
     const char = this.input[this.offset];
     const next = this.input[this.offset + 1];
 
@@ -38,7 +39,7 @@ class Tokenizer {
       token.value = -token.value;
       return token;
     }
-
+    // Testing for numbers, strings, and words
     if (/[_a-zA-Z]/.test(char)) return this.tokenizeWord();
     if (/[a-zA-Z]/.test(char)) return this.tokenizeNumber();
     if (char === '"') return this.tokenizeString();
@@ -47,14 +48,16 @@ class Tokenizer {
   }
 
   tokenizeSymbol() {
-    const twoChar = this.input.slice(this.offset, this.offset + 2);
-    const oneChar = this.input[this.offset];
-
+      const twoChar = this.input.slice(this.offset, this.offset + 2);
+      const oneChar = this.input[this.offset];
+      
+    // Multi-character symbols
     if (multiCharSymbolMap[twoChar]) {
-      this.offset += 2;
-      return new multiCharSymbolMap[twoChar]();
+        this.offset += 2;
+        return new multiCharSymbolMap[twoChar]();
     }
-
+        
+    // Single-character symbols
     if (symbolMap[oneChar]) {
       this.offset++;
       return new symbolMap[oneChar]();
