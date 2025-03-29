@@ -40,8 +40,8 @@ class Tokenizer {
       return token;
     }
     // Testing for numbers, strings, and words
-    if (/[_a-zA-Z]/.test(char)) return this.tokenizeWord();
-    if (/[a-zA-Z]/.test(char)) return this.tokenizeNumber();
+    if (this.isLetter(char)) return this.tokenizeWord();
+    if (this.isDigit(char)) return this.tokenizeNumber();
     if (char === '"') return this.tokenizeString();
 
     return this.tokenizeSymbol();
@@ -118,12 +118,12 @@ class Tokenizer {
 
   tokenizeString() {
     let result = "";
-    this.offset++; 
+    this.offset++;
 
     while (this.offset < this.input.length) {
       const char = this.input[this.offset];
       if (char === '"') {
-        this.offset++; 
+        this.offset++;
         return new StringToken(result);
       }
       result += char;
@@ -132,7 +132,18 @@ class Tokenizer {
 
     throw new Error("Unterminated string literal");
   }
-  
+  isLetter(char) {
+    return /[a-zA-Z]/.test(char);
+  }
+
+  isLetterOrDigit(char) {
+    return /[a-zA-Z0-9]/.test(char);
+  }
+
+  isDigit(char) {
+    return /[0-9]/.test(char);
+  }
+
   skipWhiteSpace() {
     while (
       this.offset < this.input.length &&
