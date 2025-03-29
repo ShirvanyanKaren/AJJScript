@@ -89,3 +89,22 @@ const {
     super: SuperToken,
     init: ConstructorToken,
   };
+
+  const symbolMap = {
+    "{": LeftCurlyToken,
+    "}": RightCurlyToken,
+    "(": LeftParenToken,
+    ")": RightParenToken,
+    ".": DotToken,
+    ";": SemiColonToken,
+    ",": CommaToken,
+    ":": ColonToken,
+    "+": PlusToken,
+    "-": MinusToken,
+    "*": MultiplyToken,
+    "/": DivideToken,
+    "=": AssignmentToken,
+    "!": FalseToken,
+    "<": LessThanToken,
+    ">": GreaterThanToken,
+  }; 
