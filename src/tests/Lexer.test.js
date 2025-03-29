@@ -438,5 +438,95 @@ describe("Tokenizer Tests", () => {
     });
   });
 
-  
+  describe("Variable Declarations", () => {
+    test("Variable assignment", () => {
+      expectTokenizes("var: int = 10;", [
+        new VariableToken("var"),
+        new ColonToken(),
+        new IntegerTypeToken(),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      ]);
+    });
+    test("Variable assignment with access token", () => {
+      expectTokenizes("public var: int = 10;", [
+        new PublicToken(),
+        new VariableToken("var"),
+        new ColonToken(),
+        new IntegerTypeToken(),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      ]);
+    });
+  });
+
+  describe("Control Flow", () => {
+    test("While loop", () => {
+      expectTokenizes("while (true) { break; }", [
+        new WhileToken(),
+        new LeftParenToken(),
+        new TrueToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new BreakToken(),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      ]);
+    });
+  });
+
+  describe("Edge Cases", () => {
+    test("Empty spaces should be ignored", () => {
+      expectTokenizes("   ", []);
+    });
+    test("Valid single character symbols", () => {
+      expectTokenizes("{}();,", [
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new SemiColonToken(),
+        new CommaToken(),
+      ]);
+    });
+  });
+  describe("To string checks", () => {
+    test("To string checks", () => {
+      expect(new IntegerTypeToken(5).toString()).toBe(
+        "IntegerTypeToken(number)",
+      );
+      expect(new StringToken("Hello, World!").toString()).toBe(
+        "StringToken(string)",
+      );
+      expect(new BaseToken().toString()).toBe("BaseToken(object)");
+    });
+  });
+
+  describe("Instance Checks", () => {
+    test("InstanceOf checks", () => {
+      expect(new IntegerTypeToken()).toBeInstanceOf(IntegerTypeToken);
+      expect(new PublicToken()).toBeInstanceOf(AccessToken);
+      expect(new ProtectedToken()).toBeInstanceOf(ProtectedToken);
+      expect(new VariableToken("var")).toBeInstanceOf(VariableToken);
+      expect(new PrivateToken()).toBeInstanceOf(AccessToken);
+    });
+    test("Not InstanceOf checks", () => {
+      expect(new IntegerTypeToken()).not.toBeInstanceOf(AccessToken);
+      expect(new PublicToken()).not.toBeInstanceOf(IntegerTypeToken);
+    });
+  });
+});
+
+describe("Error Handling", () => {
+  test("Unexpected token should throw error", () => {
+    expect(() => expectTokenizes("@", [])).toThrow();
+  });
+  test("Unterminated string should throw error", () => {
+    expect(() => expectTokenizes('"Unclosed String', [])).toThrow();
+  });
+  test("Unterminated string literal should throw error", () => {
+    expect(() => expectTokenizes('"Unclosed String', [])).toThrow();
+  });
 });
