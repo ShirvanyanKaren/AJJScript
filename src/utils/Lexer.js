@@ -108,3 +108,16 @@ const {
     "<": LessThanToken,
     ">": GreaterThanToken,
   }; 
+
+  const multiCharSymbolMap = {
+    "==": EqualsToken,
+    "!=": NotEqualsToken,
+    "<=": LessThanEqualToken,
+    ">=": GreaterThanEqualToken,
+  };
+  
+  module.exports = {
+    keywordMap,
+    symbolMap,
+    multiCharSymbolMap,
+  };
