@@ -25,7 +25,33 @@ class Tokenizer {
     return this.tokens;
   }
 
-  nextToken() {}
+  nextToken() {
+    this.skipWhiteSpace();
+    if (this.offset >= this.input.length) return null;
+
+    const char = this.input[this.offset];
+    const next = this.input[this.offset + 1];
+
+    if (char === "-" && this.isDigit(next)) {
+      this.offset++;
+      const token = this.tokenizeNumber();
+      token.value = -token.value;
+      return token;
+    }
+
+    if (/[_a-zA-Z]/.test(char)) 
+        return this.tokenizeWord();
+    if (/[a-zA-Z]/.test(char)) 
+        return this.tokenizeNumber();
+    if (char === '"') 
+        return this.tokenizeString();
+
+    return this.tokenizeSymbol();
+  }
+
+  tokenizeSymbol() {}
+
+  tokenizeWord() {}
 
   skipWhiteSpace() {
     while (
