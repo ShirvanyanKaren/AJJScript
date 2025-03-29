@@ -132,7 +132,7 @@ class Tokenizer {
 
     throw new Error("Unterminated string literal");
   }
-  
+
   isLetter(char) {
     return /[a-zA-Z]/.test(char);
   }
@@ -154,3 +154,5 @@ class Tokenizer {
     }
   }
 }
+
+module.exports = Tokenizer;

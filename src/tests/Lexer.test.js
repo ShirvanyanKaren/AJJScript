@@ -137,3 +137,40 @@ describe("Tokenizer Tests", () => {
     });
   });
 });
+
+describe("Basic Tokens", () => {
+  test("Empty input should return no tokens", () => {
+    expectTokenizes("", []);
+  });
+
+  test("Basic symbols", () => {
+    expectTokenizes("{}();", [
+      new LeftCurlyToken(),
+      new RightCurlyToken(),
+      new LeftParenToken(),
+      new RightParenToken(),
+      new SemiColonToken(),
+    ]);
+  });
+});
+
+describe("Keywords and Literals", () => {
+  test("Boolean literals", () => {
+    expectTokenizes("if (false) {}", [
+      new IfToken(),
+      new LeftParenToken(),
+      new FalseToken(),
+      new RightParenToken(),
+      new LeftCurlyToken(),
+      new RightCurlyToken(),
+    ]);
+  });
+
+  test("String literals", () => {
+    expectTokenizes(`return \"Hello, World!\";`, [
+      new ReturnToken(),
+      new StringToken("Hello, World!"),
+      new SemiColonToken(),
+    ]);
+  });
+});
