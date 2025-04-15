@@ -195,27 +195,29 @@ class Parser {
             }
             this.consume(RightCurlyToken, "Expected '}' after constructor body");
             return new Constructor(params, superCall, body);
-        }
-    
-        // methoddef ::= 'method' methodname '(' comma_vardec ')' type '{' stmt* '}'
-        parseMethodDef() {
-            this.consume(MethodToken, "Expected 'method' keyword");
-            const methodNameToken = this.consume(MethodNameToken, "Expected method name");
-            const methodName = methodNameToken.value;
-    
-            this.consume(LeftParenToken, "Expected '(' after method name");
-            const params = this.parseCommaSeparated(this.parseVarDec.bind(this), RightParenToken);
-            this.consume(RightParenToken, "Expected ')' after method parameters");
-    
-            const returnType = this.parseType();
-            this.consume(LeftCurlyToken, "Expected '{' to start method body");
-    
-            const body = [];
-            while (!this.check(RightCurlyToken)) {
-                body.push(this.parseStmt());
-            }
-            this.consume(RightCurlyToken, "Expected '}' after method body");
-            return new MethodDef(methodName, params, returnType, body);
+
         }
 
+        parseMethodDef() {
+                this.consume(MethodToken, "Expected 'method' keyword");
+                const methodNameToken = this.consume(MethodNameToken, "Expected method name");
+                const methodName = methodNameToken.value;
+        
+                this.consume(LeftParenToken, "Expected '(' after method name");
+                const params = this.parseCommaSeparated(this.parseVarDec.bind(this), RightParenToken);
+                this.consume(RightParenToken, "Expected ')' after method parameters");
+        
+                const returnType = this.parseType();
+                this.consume(LeftCurlyToken, "Expected '{' to start method body");
+        
+                const body = [];
+                while (!this.check(RightCurlyToken)) {
+                    body.push(this.parseStmt());
+                }
+                this.consume(RightCurlyToken, "Expected '}' after method body");
+                return new MethodDef(methodName, params, returnType, body);
+        }
+
+
+    
 }
