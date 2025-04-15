@@ -42,7 +42,21 @@ describe('AST Nodes', () => {
         expect(ctor.body).toEqual(body);
     });
 
-    
+    test('should create a VarDec node', () => {
+        const varType = { typeName: 'int' };
+        const identifier = 'x';
+        const varDec = new VarDec(varType, identifier);
+        expect(varDec.varType).toEqual(varType);
+        expect(varDec.identifier).toBe(identifier);
+    });
+
+    test('should create an ExpressionStatement node', () => {
+        const expression = 'x + y';
+        const exprStmt = new ExpressionStatement(expression);
+        expect(exprStmt.expression).toBe(expression);
+    });
+
+
 
 
 
