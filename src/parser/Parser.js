@@ -53,3 +53,11 @@ const {
 } = require("../lexer/tokens/StatementTokens");
 
 const VariableToken = require("../lexer/tokens/VariableToken");
+
+
+class Parser {
+    constructor(tokens) {
+        this.tokens = tokens;
+        this.current - 0;
+    }
+}
