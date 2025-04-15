@@ -14,3 +14,27 @@ class ClassDef {
         this.methods = methods;
     }
 }
+
+class Constructor {
+    constructor(params, superCall, body) {
+        this.params = params;
+        this.superCall = superCall;
+        this.body = body;
+    }
+}
+
+class MethodDef {
+    constructor(name, params, returnType, body) {
+        this.name = name;
+        this.params = params;
+        this.returnType = returnType;
+        this.body = body;
+    }
+}
+
+class VarDec {
+    constructor(varType, identifier) {
+        this.varType = varType;
+        this.identifier = identifier;
+    }
+}
