@@ -345,4 +345,20 @@ class Parser {
     }
     return left;
   }
+
+  parseCallExp() {
+          let exp = this.parsePrimaryExp();
+          while (this.match(DotToken)) {
+              const methodNameToken = this.consume(MethodNameToken, "Expected method name after '.'");
+              this.consume(LeftParenToken, "Expected '(' after method name");
+              const args = this.parseCommaSeparated(this.parseExp.bind(this), RightParenToken);
+              this.consume(RightParenToken, "Expected ')' after call arguments");
+              exp = {type: "CallExpression", callee: exp, methodName: methodNameToken.value, arguments: args};
+          }
+          return exp;
+      }
+
+
+
+  
 }
