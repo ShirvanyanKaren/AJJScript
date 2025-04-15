@@ -38,3 +38,28 @@ class VarDec {
         this.identifier = identifier;
     }
 }
+
+
+class ExpressionStatement {
+    constructor(expression) {
+        this.expression = expression;
+    }
+}
+
+class BinaryExpression {
+    constructor(left, operator, right) {
+        this.left = left;
+        this.operator = operator;
+        this.right = right;
+    }
+}
+
+module.exports = {
+    Program,
+    ClassDef,
+    Constructor,
+    MethodDef,
+    VarDec,
+    ExpressionStatement,
+    BinaryExpression,
+};
