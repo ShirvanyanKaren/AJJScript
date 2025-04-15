@@ -320,5 +320,29 @@ class Parser {
     return { type: "Block", statements };
   }
 
-  
+  parseExp() {
+    return this.parseAddExp();
+  }
+
+  // Additive expressions
+  parseAddExp() {
+    let left = this.parseMultExp();
+    while (this.match(PlusToken, MinusToken)) {
+      const operator = this.previous();
+      const right = this.parseMultExp();
+      left = new BinaryExpression(left, operator, right);
+    }
+    return left;
+  }
+
+  // Multiplicative expressions
+  parseMultExp() {
+    let left = this.parseCallExp();
+    while (this.match(MultiplyToken, DivideToken)) {
+      const operator = this.previous();
+      const right = this.parseCallExp();
+      left = new BinaryExpression(left, operator, right);
+    }
+    return left;
+  }
 }
