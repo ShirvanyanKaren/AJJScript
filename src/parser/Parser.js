@@ -347,18 +347,95 @@ class Parser {
   }
 
   parseCallExp() {
-          let exp = this.parsePrimaryExp();
-          while (this.match(DotToken)) {
-              const methodNameToken = this.consume(MethodNameToken, "Expected method name after '.'");
-              this.consume(LeftParenToken, "Expected '(' after method name");
-              const args = this.parseCommaSeparated(this.parseExp.bind(this), RightParenToken);
-              this.consume(RightParenToken, "Expected ')' after call arguments");
-              exp = {type: "CallExpression", callee: exp, methodName: methodNameToken.value, arguments: args};
-          }
-          return exp;
+    let exp = this.parsePrimaryExp();
+    while (this.match(DotToken)) {
+      const methodNameToken = this.consume(
+        MethodNameToken,
+        "Expected method name after '.'",
+      );
+      this.consume(LeftParenToken, "Expected '(' after method name");
+      const args = this.parseCommaSeparated(
+        this.parseExp.bind(this),
+        RightParenToken,
+      );
+      this.consume(RightParenToken, "Expected ')' after call arguments");
+      exp = {
+        type: "CallExpression",
+        callee: exp,
+        methodName: methodNameToken.value,
+        arguments: args,
+      };
+    }
+    return exp;
+  }
+
+  parsePrimaryExp() {
+    const token = this.peek();
+    if (this.match(VariableToken)) {
+      return { type: "Variable", name: token.value };
+    }
+    if (this.match(IntegerToken)) {
+      return { type: "IntegerLiteral", value: token.value };
+    }
+    if (this.match(StringToken)) {
+      return { type: "StringLiteral", value: token.value };
+    }
+    if (this.match(ThisToken)) {
+      return { type: "This" };
+    }
+    if (this.match(PrintToken)) {
+      this.consume(LeftParenToken, "Expected '(' after println");
+      const arg = this.parseExp();
+      this.consume(RightParenToken, "Expected ')' after println argument");
+      return { type: "Print", argument: arg };
+    }
+    if (this.match(NewToken)) {
+      const classNameToken = this.consume(
+        ClassNameTypeToken,
+        "Expected class name after new",
+      );
+      this.consume(LeftParenToken, "Expected '(' after class name");
+      const args = this.parseCommaSeparated(
+        this.parseExp.bind(this),
+        RightParenToken,
+      );
+      this.consume(RightParenToken, "Expected ')' after new arguments");
+      return {
+        type: "NewExpression",
+        className: classNameToken.value,
+        arguments: args,
+      };
+    }
+    if (this.match(LeftParenToken)) {
+      const expr = this.parseExp();
+      this.consume(RightParenToken, "Expected ')' after expression");
+      return expr;
+    }
+    throw new Error(`Unexpected token ${token.constructor.name} in expression`);
+  }
+  // Utility: Parse a comma-separated list
+  parseCommaSeparated(parseFunc, endTokenType) {
+    const list = [];
+    if (!this.check(endTokenType)) {
+      list.push(parseFunc());
+      while (this.match(CommaToken)) {
+        list.push(parseFunc());
       }
+    }
+    return list;
+  }
 
-
-
-  
+  // Helper: Check if a token is a valid start for a type
+  isTypeToken(token) {
+    const typeTokens = [
+      IntegerTypeToken,
+      StringTypeToken,
+      BooleanTypeToken,
+      VoidTypeToken,
+      ClassNameTypeToken,
+    ];
+    return typeTokens.some((type) => token instanceof type);
+  }
 }
+
+module.exports = Parser;
