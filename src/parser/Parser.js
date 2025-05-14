@@ -67,7 +67,7 @@ const VariableToken = require("../lexer/tokens/VariableToken");
 class Parser {
   constructor(tokens) {
     this.tokens = tokens;
-    this.current - 0;
+    this.current = 0;
   }
   peek() {
     return this.tokens[this.current];
@@ -255,6 +255,10 @@ class Parser {
     if (this.match(ReturnToken)) {
       return this.parseReturnStmt();
     }
+    if (this.match(BreakToken)) {
+      this.consume(SemiColonToken, "Expected ';' after break statement");
+      return { type: "Break" };
+    }
     if (this.match(LeftCurlyToken)) {
       return this.parseBlockStmt();
     }
@@ -379,6 +383,12 @@ class Parser {
     }
     if (this.match(StringToken)) {
       return { type: "StringLiteral", value: token.value };
+    }
+    if (this.match(TrueToken)) {
+      return { type: "BooleanLiteral", value: true };
+    }
+    if (this.match(FalseToken)) {
+      return { type: "BooleanLiteral", value: false };
     }
     if (this.match(ThisToken)) {
       return { type: "This" };
