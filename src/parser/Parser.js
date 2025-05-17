@@ -26,6 +26,15 @@ const {
 
 
 
+const {
+  parseClassDef,
+  parseConstructor,
+  parseMethodDef,
+  parseVarDec,
+} = require("./ClassParser");
+
+
+
 /**
  * The main Parser class for the AJJ language.
  * It processes a list of tokens into an abstract syntax tree (AST).
