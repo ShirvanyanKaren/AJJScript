@@ -18,13 +18,36 @@ const { ClassToken, ClassNameTypeToken: ClassNameToken } = require("../lexer/tok
 const { VariableToken, RightParenToken, CommaToken } = require("../lexer/tokens");
 
   
-  function isTypeToken(token) {
+function isTypeToken(token) {
+    return (
+      token instanceof IntegerTypeToken ||
+      token instanceof StringTypeToken ||
+      token instanceof BooleanTypeToken ||
+      token instanceof VoidTypeToken ||
+      token instanceof ClassNameTypeToken ||
+      (token instanceof require("../lexer/tokens/VariableToken") && token._isClassName)
+    );
   }
   
   function isAccessModifier(token) {
+    return (
+      token instanceof ProtectedToken ||
+      token instanceof PrivateToken ||
+      token instanceof PublicToken
+    );
   }
   
   function isClassName(name, tokens) {
+    for (let i = 0; i < tokens.length - 1; i++) {
+      if (
+        tokens[i] instanceof ClassToken &&
+        tokens[i + 1] instanceof ClassNameToken &&
+        tokens[i + 1].value === name
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
   
   function parseCommaSeparated({ parser, parseFunc, endToken }) {
