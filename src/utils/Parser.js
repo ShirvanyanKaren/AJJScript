@@ -18,14 +18,14 @@ const { ClassToken, ClassNameTypeToken: ClassNameToken } = require("../lexer/tok
 const { VariableToken, RightParenToken, CommaToken } = require("../lexer/tokens");
 
   
-function isTypeToken(token) {
+  function isTypeToken(token) {
     return (
       token instanceof IntegerTypeToken ||
       token instanceof StringTypeToken ||
       token instanceof BooleanTypeToken ||
       token instanceof VoidTypeToken ||
       token instanceof ClassNameTypeToken ||
-      (token instanceof require("../lexer/tokens/VariableToken") && token._isClassName)
+      (token instanceof VariableToken && token._isClassName)
     );
   }
   
@@ -51,13 +51,40 @@ function isTypeToken(token) {
   }
   
   function parseCommaSeparated({ parser, parseFunc, endToken }) {
+    const list = [];
+    if (!parser.check(endToken)) {
+      list.push(parseFunc());
+      while (parser.match(require("../lexer/tokens/SymbolTokens").CommaToken)) {
+        list.push(parseFunc());
+      }
+    }
+    return list;
   }
 
 
   function parseUntil(parser, parseFunc, endToken) {
+    const items = [];
+    while (!parser.check(endToken) && !parser.isAtEnd()) {
+      items.push(parseFunc.call(parser));
+    }
+    return items;
   }
 
   function parseParams(parser) {
+    const params = [];
+  
+    if (!parser.check(RightParenToken)) {
+      do {
+        const typeToken = parser.parseType(); 
+        const nameToken = parser.consume(VariableToken, "Expected variable name in parameter list");
+        params.push({
+          varType: typeToken,
+          identifier: nameToken.value,
+        });
+      } while (parser.match(CommaToken));
+    }
+  
+    return params;
   }
   
   module.exports = {
