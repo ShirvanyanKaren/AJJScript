@@ -26,6 +26,14 @@ function validateConstructor(classDef, ctx) {
       );
     }
   }
+  if (ctor.params.length === 0 && ctor.superCall) {
+    ctor.params = ctor.superCall.args.map((arg, i) => ({
+      varType: typeCheckExpression(arg),
+      identifier: `param${i}`
+    }));
+  }
+
+
 
 
 }
