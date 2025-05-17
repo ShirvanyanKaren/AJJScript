@@ -25,7 +25,6 @@ const {
 } = require("./ASTNodes");
 
 
-
 const {
   parseClassDef,
   parseConstructor,
@@ -33,6 +32,24 @@ const {
   parseVarDec,
 } = require("./ClassParser");
 
+const {
+  parseStmt,
+  parseIfStmt,
+  parseWhileStmt,
+  parseReturnStmt,
+  parseBlockStmt,
+} = require("./StatementParser");
+
+const {
+  parseExp,
+  parseTernary,
+  parseComparison,
+  parseAddExp,
+  parseMultExp,
+  parseUnaryExp,
+  parseCallExp,
+  parsePrimaryExp,
+} = require("./ExpParser");
 
 
 /**
