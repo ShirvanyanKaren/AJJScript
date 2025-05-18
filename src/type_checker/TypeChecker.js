@@ -1,4 +1,10 @@
-
+const TypeCheckerError = require("./TypeCheckerError");
+const { buildClassRegistry } = require("./ClassRegistry");
+const { validateInheritanceHierarchy } = require("./InheritanceValidator");
+const { validateClassMembers } = require("./ClassMemberValidator");
+const { typeCheckMethodBodies } = require("./MethodBodyChecker");
+const { typeCheckStatement } = require("./StatementValidator");
+const { typeCheckSuperCall } = require("./SuperCallValidator");
 
 
 class TypeChecker {
@@ -13,14 +19,25 @@ class TypeChecker {
   }
 
   typeCheck(program) {
+    const { classTable, inheritanceMap } = buildClassRegistry(program.classDefs);
+    this.classTable = classTable;
+    this.inheritanceMap = inheritanceMap;
 
+    validateInheritanceHierarchy(this.classTable, this.inheritanceMap);
+    validateClassMembers(this.classTable, this.inheritanceMap, this);
+    typeCheckMethodBodies(this.classTable, this);
+  
+    program.statements.forEach(stmt => typeCheckStatement(stmt, this));
   }
 
 
   
 
   typeCheckConstructorBody(constructor) {
-
+    if (constructor.superCall) {
+      typeCheckSuperCall(constructor.superCall, this);
+    }
+    constructor.body.forEach((stmt) => typeCheckStatement(stmt, this));
   }
   
 }
