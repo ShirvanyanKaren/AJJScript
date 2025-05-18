@@ -368,6 +368,149 @@ describe('Parser - Consolidated Tests', () => {
     
 
   })
+  describe('Statement Parsing', () => {
+    test('should parse variable declarations', () => {
+      const tokens = [
+        new IntegerTypeToken(),
+        createVar("counter"),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.varType).toEqual({ typeName: "integer" });
+      expect(result.identifier).toBe("counter");
+    });
+    
+    test('should parse assignment statements', () => {
+      const tokens = [
+        createVar("x"),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("Assignment");
+      expect(result.left).toEqual({ type: 'Variable', name: 'x' });
+      expect(result.right).toEqual({ type: 'IntegerLiteral', value: 10 });
+    });
+    
+    test('should parse if statements', () => {
+      const tokens = [
+        new IfToken(),
+        new LeftParenToken(),
+        createVar("condition"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("If");
+      expect(result.condition).toEqual({ type: 'Variable', name: 'condition' });
+      expect(result.thenBranch.type).toBe("Block");
+      expect(result.thenBranch.statements.length).toBe(1);
+      expect(result.elseBranch).toBeNull();
+    });
+    
+    test('should parse if-else statements', () => {
+      const tokens = [
+        new IfToken(),
+        new LeftParenToken(),
+        createVar("condition"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new ElseToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("If");
+      expect(result.condition).toEqual({ type: 'Variable', name: 'condition' });
+      expect(result.thenBranch.type).toBe("Block");
+      expect(result.elseBranch.type).toBe("Block");
+    });
+    
+    test('should parse while statements', () => {
+      const tokens = [
+        new WhileToken(),
+        new LeftParenToken(),
+        createVar("condition"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("While");
+      expect(result.condition).toEqual({ type: 'Variable', name: 'condition' });
+      expect(result.body.type).toBe("Block");
+    });
+    
+    test('should parse return statements', () => {
+      const tokens = [
+        new ReturnToken(),
+        new IntegerToken(42),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("Return");
+      expect(result.value).toEqual({ type: 'IntegerLiteral', value: 42 });
+    });
+    
+    test('should parse empty return statements', () => {
+      const tokens = [
+        new ReturnToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("Return");
+      expect(result.value).toBeNull();
+    });
+    
+    test('should parse block statements', () => {
+      const tokens = [
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        new StringTypeToken(),
+        createVar("y"),
+        new SemiColonToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("Block");
+      expect(result.statements.length).toBe(2);
+    });
+    
+    test('should parse break statement', () => {
+      const tokens = [
+        new BreakToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseStmt();
+      
+      expect(result.type).toBe("Break");
+    });
+  })
 
 
 }
