@@ -843,6 +843,107 @@ describe('Class-related Parsing', () => {
     });
   })
 
+  describe('Error Handling', () => {
+    test('should throw error on missing semicolon after expression', () => {
+      const tokens = [
+        new IntegerToken(42),
+        // missing semicolon
+        new IntegerToken(10)
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        parser.parseStmt();
+      }).toThrow(/Expected ';'/);
+    });
+    
+    test('should throw error on missing closing parenthesis in if statement', () => {
+      const tokens = [
+        new IfToken(),
+        new LeftParenToken(),
+        createVar("x"),
+        // missing right paren
+        new LeftCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        parser.parseStmt();
+      }).toThrow(/Expected '\)'/);
+    });
+    
+    test('should throw error on missing closing brace in block', () => {
+      const tokens = [
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        // missing closing brace
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        parser.parseStmt();
+      }).toThrow(/Expected '}'/);
+    });
+    
+    test('should throw error on unexpected token in expression', () => {
+      const tokens = [
+        new LeftCurlyToken(), // This is not valid as an expression
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        parser.parseExp();
+      }).toThrow(/Unexpected token/);
+    });
+    
+    test('should handle invalid assignment by treating it as an assignment rather than throwing', () => {
+      const tokens = [
+        new IntegerToken(42), // Cannot assign to a literal
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        const result = parser.parseStmt();
+        // Verify it treats it as an assignment
+        expect(result.type).toBe("Assignment");
+      }).not.toThrow();
+    });
+    
+    test('should throw error when there is no matching class name token', () => {
+      const tokens = [
+        new ClassToken(),
+        // Missing class name
+        new LeftCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        parser.parseClassDef();
+      }).toThrow(/Expected class name/);
+    });
+    
+    test('should throw error when parser reaches end of input unexpectedly', () => {
+      const tokens = [
+        new WhileToken(),
+        new LeftParenToken(),
+        // Incomplete input
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(() => {
+        parser.parseStmt();
+      }).toThrow();
+    });
+  })
+
 }
 
 );
