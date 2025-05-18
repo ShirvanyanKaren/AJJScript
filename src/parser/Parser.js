@@ -25,6 +25,32 @@ const {
 } = require("./ASTNodes");
 
 
+const {
+  parseClassDef,
+  parseConstructor,
+  parseMethodDef,
+  parseVarDec,
+} = require("./ClassParser");
+
+const {
+  parseStmt,
+  parseIfStmt,
+  parseWhileStmt,
+  parseReturnStmt,
+  parseBlockStmt,
+} = require("./StatementParser");
+
+const {
+  parseExp,
+  parseTernary,
+  parseComparison,
+  parseAddExp,
+  parseMultExp,
+  parseUnaryExp,
+  parseCallExp,
+  parsePrimaryExp,
+} = require("./ExpParser");
+
 
 /**
  * The main Parser class for the AJJ language.

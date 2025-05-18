@@ -7,6 +7,13 @@ class WhileToken extends BaseToken {}
 class BreakToken extends BaseToken {}
 class PrintToken extends BaseToken {}
 class ThisToken extends BaseToken {}
+class ForToken extends BaseToken {
+    constructor() {
+        super();
+        this.type = "ForToken";
+    }
+
+}
 
 module.exports = {
     ReturnToken,
@@ -16,4 +23,5 @@ module.exports = {
     BreakToken,
     PrintToken,
     ThisToken,
+    ForToken,
 };
