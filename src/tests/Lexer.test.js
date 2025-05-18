@@ -438,7 +438,7 @@ describe("Tokenizer Tests", () => {
       expectTokenizes(">=", [new GreaterThanEqualToken()]);
     });
     test("Assignment for ! operator", () => {
-      expectTokenizes("!", [new NotToken()]);
+      expectTokenizes("!", [new FalseToken()]);
     });
     test("Assignment for > operator", () => {
       expectTokenizes(">", [new GreaterThanToken()]);
