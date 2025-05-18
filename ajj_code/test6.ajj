@@ -1,0 +1,26 @@
+class A {
+    protected int a;
+    private int b;
+    init(int a, int b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    method print() void{
+        println(this.a);
+        println(this.b);
+    }
+
+}
+
+class B extends A {
+    int c;
+    super(a, b, c) {
+        this.c = c;
+    }
+
+
+}
+
+
+B b = new B(1, 2, 3);

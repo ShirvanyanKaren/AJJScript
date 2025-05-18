@@ -1,0 +1,17 @@
+class A {
+    int a;
+    int b;
+    init() {
+        this.a = 1;
+        this.b = 2;
+    }
+
+    method print() void{
+        println(this.a);
+        println(this.b);
+    }
+
+}
+
+A a = new A();
+a.print();

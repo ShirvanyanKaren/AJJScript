@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ShirvanyanKaren/AJJScript#readme",
   "dependencies": {
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "jsdoc": "^4.0.4"
   }
 }

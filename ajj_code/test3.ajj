@@ -1,0 +1,22 @@
+boolean b = true;
+int num = 0;
+
+while (b) {
+    b = false;
+    num = 10;
+    println(num);
+} 
+
+
+if (b) {
+    num = 10;
+    num++;
+} else {
+    num = 20;
+    num++;
+}
+
+println(num);
+
+int num2 = b ? 10 : 20;
+println(num2);

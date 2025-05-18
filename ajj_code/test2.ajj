@@ -1,0 +1,10 @@
+method printThisNum(int num) void {
+    println("printing this " + num);
+};
+
+printThisNum(10);
+
+boolean b = true;
+
+int num = b ? 10 : 20;
+println(num);

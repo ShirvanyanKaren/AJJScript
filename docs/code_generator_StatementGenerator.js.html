@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: code_generator/StatementGenerator.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: code_generator/StatementGenerator.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * StatementGenerator.js
+ *
+ * Handles generation of code for statements.
+ */
+
+function generateStatement(statement, ctx) {
+  const {
+    appendLine,
+    indentLevelCallback,
+    generateExpression,
+    declaredVariables,
+  } = ctx;
+
+  switch (statement.type) {
+    case "ExpressionStatement": {
+      if (statement.expression?.type === "MethodDeclaration") {
+        const { name, params, body } = statement.expression;
+        const paramList = params.map((p) => p.identifier).join(", ");
+        appendLine(`function ${name}(${paramList}) {`);
+        indentLevelCallback(1);
+        for (const stmt of body.statements) {
+          generateStatement(stmt, ctx);
+        }
+        indentLevelCallback(-1);
+        appendLine("}");
+      } else {
+        appendLine(`${generateExpression(statement.expression, ctx)};`);
+      }
+      break;
+    }
+
+    case "Assignment": {
+      let target, value;
+      if (statement.left.identifier &amp;&amp; statement.left.varType) {
+        const varName = statement.left.identifier;
+        declaredVariables.add(varName);
+        target = `let ${varName}`;
+      } else if (statement.left.type === "Variable") {
+        target = statement.left.name;
+        if (!declaredVariables.has(target)) {
+          declaredVariables.add(target);
+          target = `let ${target}`;
+        }
+      } else {
+        target = generateExpression(statement.left, ctx);
+      }
+
+      if (
+        statement.left.type === "FieldAccess" &amp;&amp;
+        statement.right.type === "Variable" &amp;&amp;
+        declaredVariables.has(statement.right.name)
+      ) {
+        value = statement.right.name;
+      } else {
+        value = generateExpression(statement.right, ctx);
+      }
+
+      appendLine(`${target} = ${value};`);
+      break;
+    }
+    case "If": {
+      appendLine(`if (${generateExpression(statement.condition, ctx)}) {`);
+      indentLevelCallback(1);
+      generateStatement(statement.thenBranch, ctx);
+      indentLevelCallback(-1);
+      if (statement.elseBranch) {
+        appendLine("} else {");
+        indentLevelCallback(1);
+        generateStatement(statement.elseBranch, ctx);
+        indentLevelCallback(-1);
+      }
+      appendLine("}");
+      break;
+    }
+    case "For": {
+      let init;
+      if (statement.initializer.type === "Assignment") {
+        const { left, right } = statement.initializer;
+
+        let target;
+        if (left.identifier &amp;&amp; left.varType) {
+          const varName = left.identifier;
+          declaredVariables.add(varName);
+          target = `let ${varName}`;
+        } else {
+          target = generateExpression(left, ctx);
+        }
+
+        const value = generateExpression(right, ctx);
+        init = `${target} = ${value}`;
+      } else {
+        init = generateExpression(statement.initializer, ctx);
+      }
+
+      const cond = generateExpression(statement.condition, ctx);
+      const incr = generateExpression(statement.increment, ctx);
+
+      appendLine(`for (${init}; ${cond}; ${incr}) {`);
+      indentLevelCallback(1);
+      generateStatement(statement.body, ctx);
+      indentLevelCallback(-1);
+      appendLine("}");
+      break;
+    }
+    case "While": {
+        appendLine(`while (${generateExpression(statement.condition, ctx)}) {`);
+        indentLevelCallback(1);
+        generateStatement(statement.body, ctx);
+        indentLevelCallback(-1);
+        appendLine("}");
+        break;
+      }
+  
+      case "Block": {
+        for (const stmt of statement.statements) {
+          generateStatement(stmt, ctx);
+        }
+        break;
+      }
+  
+      case "Return": {
+        if (statement.value) {
+          appendLine(`return ${generateExpression(statement.value, ctx)};`);
+        } else {
+          appendLine("return;");
+        }
+        break;
+      }
+  
+      case "Break": {
+        appendLine("break;");
+        break;
+      }
+  
+      case "Print": {
+        const arg = generateExpression(statement.argument, ctx);
+        appendLine(`AJJ.print(${arg});`);
+        break;
+      }
+      
+  
+      default:
+        appendLine("// Unknown statement type");
+  }
+}
+
+module.exports = { generateStatement };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parser.html">Parser</a></li></ul><h3>Global</h3><ul><li><a href="global.html#CodeGenerator">CodeGenerator</a></li><li><a href="global.html#generateClassDef">generateClassDef</a></li><li><a href="global.html#generateCode">generateCode</a></li><li><a href="global.html#generateExpression">generateExpression</a></li><li><a href="global.html#generateStatement">generateStatement</a></li><li><a href="global.html#parseClassDef">parseClassDef</a></li><li><a href="global.html#parseConstructor">parseConstructor</a></li><li><a href="global.html#parseMethodDef">parseMethodDef</a></li><li><a href="global.html#parseVarDec">parseVarDec</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 17 2025 22:19:25 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
