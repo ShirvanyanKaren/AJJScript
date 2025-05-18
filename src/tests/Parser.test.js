@@ -511,6 +511,49 @@ describe('Parser - Consolidated Tests', () => {
       expect(result.type).toBe("Break");
     });
   })
+  
+  describe('Method Call Parsing', () => {
+    test('should parse method calls', () => {
+      const tokens = [
+        createVar("obj"),
+        new DotToken(),
+        new MethodNameToken("method"),
+        new LeftParenToken(),
+        new IntegerToken(1),
+        new CommaToken(),
+        new IntegerToken(2),
+        new RightParenToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.type).toBe("MethodCall");
+      expect(result.callee).toEqual({ type: 'Variable', name: 'obj' });
+      expect(result.methodName).toBe("method");
+    });
+    
+    test('should parse chained method calls', () => {
+      const tokens = [
+        createVar("obj"),
+        new DotToken(),
+        new MethodNameToken("method1"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new DotToken(),
+        new MethodNameToken("method2"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.type).toBe("MethodCall");
+      expect(result.callee.callee).toEqual({ type: 'Variable', name: 'obj' });
+      expect(result.callee.methodName).toBe("method1");
+    });
+  })
 
 
 }
