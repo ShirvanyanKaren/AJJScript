@@ -59,6 +59,20 @@ function generateStatement(statement, ctx) {
             appendLine(`${target} = ${value};`);
             break;
           }
+          case "If": {
+            appendLine(`if (${generateExpression(statement.condition, ctx)}) {`);
+            indentLevelCallback(1);
+            generateStatement(statement.thenBranch, ctx);
+            indentLevelCallback(-1);
+            if (statement.elseBranch) {
+              appendLine("} else {");
+              indentLevelCallback(1);
+              generateStatement(statement.elseBranch, ctx);
+              indentLevelCallback(-1);
+            }
+            appendLine("}");
+            break;
+          }
     }
   
 
