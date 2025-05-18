@@ -208,7 +208,98 @@ function typeCheckExpression(expr, ctx) {
 
       return method.returnType;
     }
-  }
+    case "BinaryExpression": {
+        const leftType = typeCheckExpression(expr.left, ctx);
+        const rightType = typeCheckExpression(expr.right, ctx);
+  
+        if (expr.operator === "+") {
+          if (leftType.typeName === "integer" && rightType.typeName === "integer") {
+            return { typeName: "integer" };
+          }
+          if (leftType.typeName === "string" || rightType.typeName === "string") {
+            return { typeName: "string" };
+          }
+          throw TypeCheckerError.typeMismatch("integer or string", `${leftType.typeName} + ${rightType.typeName}`, 0, 0);
+        }
+  
+        if (["-", "*", "/"].includes(expr.operator)) {
+          if (leftType.typeName !== "integer" || rightType.typeName !== "integer") {
+            throw TypeCheckerError.typeMismatch("integer", `${leftType.typeName} or ${rightType.typeName}`, 0, 0);
+          }
+          return { typeName: "integer" };
+        }
+  
+        if (["<", ">", "<=", ">="].includes(expr.operator)) {
+          if (leftType.typeName !== "integer" || rightType.typeName !== "integer") {
+            throw TypeCheckerError.typeMismatch("integer", `${leftType.typeName} or ${rightType.typeName}`, 0, 0);
+          }
+          return { typeName: "boolean" };
+        }
+  
+        if (["==", "!="].includes(expr.operator)) {
+          if (
+            !isTypeCompatible(leftType, rightType, ctx) &&
+            !isTypeCompatible(rightType, leftType, ctx)
+          ) {
+            throw TypeCheckerError.typeMismatch(leftType.typeName, rightType.typeName, 0, 0);
+          }
+          return { typeName: "boolean" };
+        }
+  
+        if (["&&", "||"].includes(expr.operator)) {
+          if (leftType.typeName !== "boolean" || rightType.typeName !== "boolean") {
+            throw TypeCheckerError.typeMismatch("boolean", `${leftType.typeName} or ${rightType.typeName}`, 0, 0);
+          }
+          return { typeName: "boolean" };
+        }
+        
+        throw new TypeCheckerError(`Unknown operator: ${expr.operator}`, 0, 0);
+      }
+  
+      case "NewExpression": {
+        const classDef = ctx.classTable.get(expr.className);
+        if (!classDef) {
+          throw TypeCheckerError.undefinedReference(expr.className, "class", 0, 0);
+        }
+  
+        const constructor = classDef.constructor;
+        if (expr.args.length < constructor.params.length) {
+          throw TypeCheckerError.invalidMethodCall(expr.className, "constructor: wrong number of args", 0, 0);
+        }
+  
+        expr.args.forEach((arg, i) => {
+          const argType = typeCheckExpression(arg, ctx);
+          const paramType = constructor.params[i].varType;
+          if (!isTypeCompatible(paramType, argType, ctx)) {
+            throw TypeCheckerError.typeMismatch(paramType.typeName, argType.typeName, 0, 0);
+          }
+        });
+  
+        return { typeName: expr.className };
+      }
+  
+      case "Print":
+        typeCheckExpression(expr.argument, ctx);
+        return { typeName: "void" };
+  
+      case "TernaryExpression": {
+        const condType = typeCheckExpression(expr.condition, ctx);
+        if (condType.typeName !== "boolean") {
+          throw TypeCheckerError.typeMismatch("boolean", condType.typeName, 0, 0);
+        }
+  
+        const trueType = typeCheckExpression(expr.trueExpr, ctx);
+        const falseType = typeCheckExpression(expr.falseExpr, ctx);
+  
+        if (!isTypeCompatible(trueType, falseType, ctx)) {
+          throw TypeCheckerError.typeMismatch(trueType.typeName, falseType.typeName, 0, 0);
+        }
+  
+        return trueType;
+      }
+    }
+  
+    return { typeName: "void" };
 }
 
 module.exports = { typeCheckExpression };
