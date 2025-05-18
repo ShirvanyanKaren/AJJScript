@@ -220,7 +220,8 @@ describe('Parser - Consolidated Tests', () => {
       expect(program.statements).toEqual(statements);
     });
   });
-
+  
+  // Expression Parsing Tests
   describe('Expression Parsing', () => {
     test('should parse integer literals', () => {
       const tokens = [new IntegerToken(42), new SemiColonToken()];
@@ -268,7 +269,7 @@ describe('Parser - Consolidated Tests', () => {
       expect(result.left).toEqual({ type: 'IntegerLiteral', value: 5 });
       expect(result.right).toEqual({ type: 'IntegerLiteral', value: 3 });
     });
-
+    
     test('should parse binary expressions with multiplication', () => {
       const tokens = [
         new IntegerToken(5),
@@ -365,9 +366,9 @@ describe('Parser - Consolidated Tests', () => {
       
       expect(result.type).toBe("This");
     });
-    
-
-  })
+  });
+  
+  // Statement Parsing Tests
   describe('Statement Parsing', () => {
     test('should parse variable declarations', () => {
       const tokens = [
@@ -510,8 +511,9 @@ describe('Parser - Consolidated Tests', () => {
       
       expect(result.type).toBe("Break");
     });
-  })
-
+  });
+  
+  // Method Call Parsing
   describe('Method Call Parsing', () => {
     test('should parse method calls', () => {
       const tokens = [
@@ -553,8 +555,10 @@ describe('Parser - Consolidated Tests', () => {
       expect(result.callee.callee).toEqual({ type: 'Variable', name: 'obj' });
       expect(result.callee.methodName).toBe("method1");
     });
-  })
-describe('Class-related Parsing', () => {
+  });
+  
+  // Class-related Parsing Tests
+  describe('Class-related Parsing', () => {
     test('should parse simple class definitions', () => {
       const tokens = [
         new ClassToken(),
@@ -760,8 +764,9 @@ describe('Class-related Parsing', () => {
       expect(result.params.length).toBe(0);
       expect(result.body.length).toBe(0);
     });
-  })
-
+  });
+  
+  // Program Parsing Tests
   describe('Program Parsing', () => {
     test('should parse a simple program', () => {
       const tokens = [
@@ -841,8 +846,9 @@ describe('Class-related Parsing', () => {
       expect(result.classDefs[0].varDecs.length).toBe(1);
       expect(result.classDefs[0].methods.length).toBe(1);
     });
-  })
-
+  });
+  
+  // Error Handling Tests
   describe('Error Handling', () => {
     test('should throw error on missing semicolon after expression', () => {
       const tokens = [
@@ -942,8 +948,295 @@ describe('Class-related Parsing', () => {
         parser.parseStmt();
       }).toThrow();
     });
-  })
+  });
+  
+  // Token Utility Function Tests
+  describe('Token Utility Functions', () => {
+    test('should check for token types correctly', () => {
+      const parser = new Parser([]);
+      
+      // Test isTypeToken
+      expect(isTypeToken(new IntegerTypeToken())).toBe(true);
+      expect(isTypeToken(new StringTypeToken())).toBe(true);
+      expect(isTypeToken(new BooleanTypeToken())).toBe(true);
+      expect(isTypeToken(new VoidTypeToken())).toBe(true);
+      expect(isTypeToken(new ClassNameTypeToken())).toBe(true);
+      
+      // Test with non-type tokens
+      expect(isTypeToken(new IntegerToken(42))).toBe(false);
+    });
+    
+    test('should handle isAtEnd correctly', () => {
+      const parser = new Parser([]);
+      expect(parser.isAtEnd()).toBe(true);
+      
+      const parserWithTokens = new Parser([new IntegerToken(1)]);
+      expect(parserWithTokens.isAtEnd()).toBe(false);
+    });
+    
+    test('should parse comma-separated lists correctly', () => {
+      // Empty list
+      const emptyListTokens = [
+        new MethodToken(),
+        new MethodNameToken("mthd"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new VoidTypeToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new SemiColonToken(),
+      ];
+      const emptyParser = new Parser(emptyListTokens);
+      const newParser = emptyParser.parse();
+      expect(newParser.statements[0]).toBeInstanceOf(ExpressionStatement);
+      
+    });
+    
+    test('should advance tokens correctly', () => {
+      const tokens = [
+        new IntegerToken(1),
+        new IntegerToken(2),
+        new IntegerToken(3)
+      ];
+      const parser = new Parser(tokens);
+      
+      expect(parser.advance().value).toBe(1);
+      expect(parser.advance().value).toBe(2);
+      expect(parser.advance().value).toBe(3);
+      expect(parser.isAtEnd()).toBe(true);
+    });
+    
+    test('should match token types correctly', () => {
+      const tokens = [new IntegerToken(42)];
+      const parser = new Parser(tokens);
+      
+      expect(parser.match(StringToken)).toBe(false); 
+      expect(parser.match(IntegerToken, StringToken)).toBe(true); 
+      expect(parser.isAtEnd()).toBe(true);
+    });
+    
+    test('should throw when attempting to consume incorrect token', () => {
+      const parser = new Parser([new IntegerToken(42)]);
+      
+      expect(() => {
+        parser.consume(StringToken, "Expected string");
+      }).toThrow(/Expected string/);
+    });
+    
+    test('should get previous token correctly', () => {
+      const tokens = [new IntegerToken(1), new IntegerToken(2)];
+      const parser = new Parser(tokens);
+      
+      parser.advance();
+      expect(parser.previous().value).toBe(1);
+      
+      parser.advance();
+      expect(parser.previous().value).toBe(2);
+    });
+    
+    test('should peek at current token without advancing', () => {
+      const tokens = [new IntegerToken(42)];
+      const parser = new Parser(tokens);
+      
+      const peeked = parser.peek();
+      expect(peeked.value).toBe(42);
+      expect(parser.current).toBe(0); 
+    });
 
-}
+    test('expressions should be parsed correctly', () => {
+      const tokens = [
+        new IntegerTypeToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(0),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(30),
+        new PlusToken(),
+        new IntegerToken(40),
+        new MultiplyToken(),
+        new IntegerToken(50),
+        new MinusToken(),
+        new IntegerToken(60),
+        new DivideToken(),
+        new IntegerToken(70),
+        new MultiplyToken(),
+        new IntegerToken(80),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new IncrementToken(),
+        new SemiColonToken(),
+      
+        new IncrementToken(),
+        new VariableToken("num"),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new EqualsToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new NotEqualsToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new GreaterThanToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      
+        new IfToken(),
+        new LeftParenToken(),
+        new VariableToken("num"),
+        new EqualsToken(),
+        new VariableToken("num"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new ElseToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(20),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new IfToken(),
+        new LeftParenToken(),
+        new FalseToken(),
+        new AndToken(),
+        new TrueToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new ElseToken(),
+        new IfToken(),
+        new LeftParenToken(),
+        new TrueToken(),
+        new OrToken(),
+        new FalseToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(20),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new ElseToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(30),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parse()
+      expect(result.statements.length).toBe(9);
+    });
+    test('class parsing should work correctly', () => {
+      const classTokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("A"),
+        new LeftCurlyToken(),
+      
+        new ProtectedToken(),
+        new IntegerTypeToken(),
+        new VariableToken("x"),
+        new SemiColonToken(),
+      
+        new PrivateToken(),
+        new IntegerTypeToken(),
+        new VariableToken("y"),
+        new SemiColonToken(),
+      
+        new IntegerTypeToken(),
+        new VariableToken("z"),
+        new SemiColonToken(),
+      
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new IntegerTypeToken(),
+        new VariableToken("x"),
+        new CommaToken(),
+        new IntegerTypeToken(),
+        new VariableToken("y"),
+        new CommaToken(),
+        new IntegerTypeToken(),
+        new VariableToken("z"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+      
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("x"),
+        new AssignmentToken(),
+        new VariableToken("x"),
+        new SemiColonToken(),
+      
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("y"),
+        new AssignmentToken(),
+        new VariableToken("y"),
+        new SemiColonToken(),
+      
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("z"),
+        new AssignmentToken(),
+        new VariableToken("z"),
+        new SemiColonToken(),
+      
+        new RightCurlyToken(),
+      
+        new MethodToken(),
+        new MethodNameToken("printThisStuff"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new VoidTypeToken(),
+        new LeftCurlyToken(),
+      
+        new PrintToken(),
+        new LeftParenToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("z"),
+        new PlusToken(),
+        new StringToken("thisisisiis"),
+        new RightParenToken(),
+        new SemiColonToken(),
+      
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+      ];
 
-);
+      const parser = new Parser(classTokens);
+      const result = parser.parse();
+      expect(result.classDefs.length).toBe(1);
+      expect(result.classDefs[0].name).toBe("A");
+      expect(result.classDefs[0].varDecs.length).toBe(3);
+      expect(result.classDefs[0].varDecs[0].identifier).toBe("x");
+      expect(result.classDefs[0].varDecs[1].identifier).toBe("y");
+      expect(result.classDefs[0].varDecs[2].identifier).toBe("z");
+    });
+
+      
+  });
+  
+}); 
