@@ -1,4 +1,4 @@
-const TypeCheckerError = require("../type_checker/TypeCheckerError");
+const TypeCheckerError = require("../type_checker/TypeCheckError");
 
 function validateType(type, classTable) {
     if (["integer", "string", "boolean", "void"].includes(type.typeName)) return;

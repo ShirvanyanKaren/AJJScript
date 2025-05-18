@@ -1,4 +1,4 @@
-const TypeCheckerError = require("./TypeCheckerError");
+const TypeCheckerError = require("./TypeCheckError");
 
 function buildClassRegistry(classDefs) {
 

@@ -1,4 +1,4 @@
-const TypeCheckerError = require("./TypeCheckerError");
+const TypeCheckerError = require("./TypeCheckError");
 const { buildClassRegistry } = require("./ClassRegistry");
 const { validateInheritanceHierarchy } = require("./InheritanceValidator");
 const { validateClassMembers } = require("./ClassMemberValidator");

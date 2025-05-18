@@ -1,4 +1,4 @@
-const TypeCheckerError = require("./TypeCheckerError");
+const TypeCheckerError = require("./TypeCheckError");
 const { validateConstructor } = require("./ConstructorValifator");
 const { validateType } = require("../utils/TyperChecker");
 const { typeCheckExpression } = require("./ExpressionValidator");

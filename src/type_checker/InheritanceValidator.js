@@ -1,5 +1,5 @@
 // InheritanceValidator.js
-const TypeCheckerError = require("./TypeCheckerError");
+const TypeCheckerError = require("./TypeCheckError");
 
 function validateInheritanceHierarchy(classTable, inheritanceMap) {
   const visited = new Set();

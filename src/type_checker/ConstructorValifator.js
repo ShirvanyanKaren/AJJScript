@@ -1,5 +1,5 @@
 // ConstructorValidator.js
-const TypeCheckerError = require("./TypeCheckerError");
+const TypeCheckerError = require("./TypeCheckError");
 function validateConstructor(classDef, ctx) {
   const { classTable, inheritanceMap } = ctx;
   const ctor = classDef.constructor;
