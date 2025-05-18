@@ -511,7 +511,7 @@ describe('Parser - Consolidated Tests', () => {
       expect(result.type).toBe("Break");
     });
   })
-  
+
   describe('Method Call Parsing', () => {
     test('should parse method calls', () => {
       const tokens = [
@@ -554,7 +554,213 @@ describe('Parser - Consolidated Tests', () => {
       expect(result.callee.methodName).toBe("method1");
     });
   })
-
+describe('Class-related Parsing', () => {
+    test('should parse simple class definitions', () => {
+      const tokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("MyClass"),
+        new LeftCurlyToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseClassDef();
+      
+      expect(result.name).toBe("MyClass");
+      expect(result.superclass).toBeNull();
+      expect(result.varDecs.length).toBe(0);
+      expect(result.methods.length).toBe(0);
+    });
+    
+    test('should parse class with instance variables', () => {
+      const tokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("WithVars"),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        new StringTypeToken(),
+        createVar("name"),
+        new SemiColonToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseClassDef();
+      
+      expect(result.name).toBe("WithVars");
+      expect(result.varDecs.length).toBe(2);
+      expect(result.varDecs[0].identifier).toBe("x");
+      expect(result.varDecs[1].identifier).toBe("name");
+    });
+    
+    test('should parse class with extends', () => {
+      const tokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("Child"),
+        new ExtendToken(),
+        new ClassNameTypeToken("Parent"),
+        new LeftCurlyToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseClassDef();
+      
+      expect(result.name).toBe("Child");
+      expect(result.superclass).toBe("Parent");
+    });
+    
+    test('should parse new expression', () => {
+      const tokens = [
+        new NewToken(),
+        new ClassNameTypeToken("MyClass"),
+        new LeftParenToken(),
+        new IntegerToken(1),
+        new CommaToken(),
+        new StringToken("hello"),
+        new RightParenToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.type).toBe("NewExpression");
+      expect(result.className).toBe("MyClass");
+    });
+    
+    test('should parse constructor with super call', () => {
+      const classInheritanceTokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("A"),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        new VariableToken("n"),
+        new SemiColonToken(),
+      
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new IntegerTypeToken(),
+        new VariableToken("n"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("n"),
+        new AssignmentToken(),
+        new VariableToken("n"),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+      
+        new ClassToken(),
+        new ClassNameTypeToken("b"),
+        new ExtendToken(),
+        new ClassNameTypeToken("A"),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        new VariableToken("m"),
+        new SemiColonToken(),
+      
+        new SuperToken(),
+        new LeftParenToken(),
+        new VariableToken("m"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("m"),
+        new AssignmentToken(),
+        new VariableToken("m"),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken()
+      ];
+      
+      const parser = new Parser(classInheritanceTokens);
+      const result = parser.parse();
+      
+      expect(result.superCall).not.toBeNull();
+    });
+    
+    test('should parse constructor without super call', () => {
+      const tokens = [
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        // No super call here
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseConstructor();
+      
+      expect(result.params.length).toBe(0);
+      expect(result.superCall).toBeNull();
+      expect(result.body.length).toBe(1);
+    });
+    
+    test('should parse method definitions with parameters and return type', () => {
+      const tokens = [
+        new MethodToken(),
+        new MethodNameToken("calculate"),
+        new LeftParenToken(),
+        new IntegerTypeToken(),
+        createVar("a"),
+        new CommaToken(),
+        new IntegerTypeToken(),
+        createVar("b"),
+        new RightParenToken(),
+        new IntegerTypeToken(),
+        new LeftCurlyToken(),
+        new ReturnToken(),
+        new IntegerToken(42),
+        new SemiColonToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseMethodDef();
+      
+      expect(result.name).toBe("calculate");
+      expect(result.params.length).toBe(2);
+      expect(result.returnType).toEqual({ typeName:"integer" });
+      expect(result.body.length).toBe(1);
+    });
+    
+    test('should parse method with empty parameter list', () => {
+      const tokens = [
+        new MethodToken(),
+        new MethodNameToken("noParams"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new VoidTypeToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseMethodDef();
+      
+      expect(result.name).toBe("noParams");
+      expect(result.params.length).toBe(0);
+      expect(result.body.length).toBe(0);
+    });
+  })
 
 }
 
