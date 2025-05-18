@@ -103,6 +103,45 @@ function generateStatement(statement, ctx) {
       appendLine("}");
       break;
     }
+    case "While": {
+        appendLine(`while (${generateExpression(statement.condition, ctx)}) {`);
+        indentLevelCallback(1);
+        generateStatement(statement.body, ctx);
+        indentLevelCallback(-1);
+        appendLine("}");
+        break;
+      }
+  
+      case "Block": {
+        for (const stmt of statement.statements) {
+          generateStatement(stmt, ctx);
+        }
+        break;
+      }
+  
+      case "Return": {
+        if (statement.value) {
+          appendLine(`return ${generateExpression(statement.value, ctx)};`);
+        } else {
+          appendLine("return;");
+        }
+        break;
+      }
+  
+      case "Break": {
+        appendLine("break;");
+        break;
+      }
+  
+      case "Print": {
+        const arg = generateExpression(statement.argument, ctx);
+        appendLine(`AJJ.print(${arg});`);
+        break;
+      }
+      
+  
+      default:
+        appendLine("// Unknown statement type");
   }
 }
 
