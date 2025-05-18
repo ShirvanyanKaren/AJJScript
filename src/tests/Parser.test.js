@@ -268,6 +268,103 @@ describe('Parser - Consolidated Tests', () => {
       expect(result.left).toEqual({ type: 'IntegerLiteral', value: 5 });
       expect(result.right).toEqual({ type: 'IntegerLiteral', value: 3 });
     });
+
+    test('should parse binary expressions with multiplication', () => {
+      const tokens = [
+        new IntegerToken(5),
+        new MultiplyToken(),
+        new IntegerToken(3),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.left).toEqual({ type: 'IntegerLiteral', value: 5 });
+      expect(result.right).toEqual({ type: 'IntegerLiteral', value: 3 });
+    });
+    
+    test('should respect precedence in complex expressions', () => {
+      const tokens = [
+        new IntegerToken(2),
+        new PlusToken(),
+        new IntegerToken(3),
+        new MultiplyToken(),
+        new IntegerToken(4),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      // Should be parsed as: 2 + (3 * 4)
+      expect(result.left).toEqual({ type: 'IntegerLiteral', value: 2 });
+      expect(result.right.left).toEqual({ type: 'IntegerLiteral', value: 3 });
+      expect(result.right.right).toEqual({ type: 'IntegerLiteral', value: 4 });
+    });
+    
+    test('should parse boolean literals', () => {
+      // Test true token
+      let tokens = [
+        new TrueToken(),
+        new SemiColonToken()
+      ];
+      let parser = new Parser(tokens);
+      let result = parser.parseExp();
+      
+      expect(result.type).toBe("BooleanLiteral");
+      expect(result.value).toBe(true);
+      
+      // Test false token
+      tokens = [
+        new FalseToken(),
+        new SemiColonToken()
+      ];
+      parser = new Parser(tokens);
+      result = parser.parseExp();
+      
+      expect(result.type).toBe("BooleanLiteral");
+      expect(result.value).toBe(false);
+    });
+    
+    test('should parse print statement', () => {
+      const tokens = [
+        new PrintToken(),
+        new LeftParenToken(),
+        new StringToken("Hello, world!"),
+        new RightParenToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.type).toBe("Print");
+      expect(result.argument.type).toBe("StringLiteral");
+      expect(result.argument.value).toBe("Hello, world!");
+    });
+    
+    test('should parse parenthesized expressions', () => {
+      const tokens = [
+        new LeftParenToken(),
+        new IntegerToken(42),
+        new RightParenToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.type).toBe("IntegerLiteral");
+      expect(result.value).toBe(42);
+    });
+    
+    test('should parse this expression', () => {
+      const tokens = [
+        new ThisToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.type).toBe("This");
+    });
     
 
   })
