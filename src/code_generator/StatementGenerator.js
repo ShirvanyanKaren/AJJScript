@@ -30,6 +30,35 @@ function generateStatement(statement, ctx) {
           break;
         }
 
+        case "Assignment": {
+            let target, value;
+            if (statement.left.identifier && statement.left.varType) {
+              const varName = statement.left.identifier;
+              declaredVariables.add(varName);
+              target = `let ${varName}`;
+            } else if (statement.left.type === "Variable") {
+              target = statement.left.name;
+              if (!declaredVariables.has(target)) {
+                declaredVariables.add(target);
+                target = `let ${target}`;
+              }
+            } else {
+              target = generateExpression(statement.left, ctx);
+            }
+      
+            if (
+              statement.left.type === "FieldAccess" &&
+              statement.right.type === "Variable" &&
+              declaredVariables.has(statement.right.name)
+            ) {
+              value = statement.right.name;
+            } else {
+              value = generateExpression(statement.right, ctx);
+            }
+      
+            appendLine(`${target} = ${value};`);
+            break;
+          }
     }
   
 
