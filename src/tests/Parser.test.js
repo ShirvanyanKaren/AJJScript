@@ -762,6 +762,87 @@ describe('Class-related Parsing', () => {
     });
   })
 
+  describe('Program Parsing', () => {
+    test('should parse a simple program', () => {
+      const tokens = [
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        createVar("x"),
+        new AssignmentToken(),
+        new IntegerToken(42),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parse();
+      
+      expect(result.classDefs.length).toBe(0);
+      expect(result.statements.length).toBe(2);
+    });
+    
+    test('should parse a program with classes and statements', () => {
+      const tokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("main"),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parse();
+      
+      expect(result.classDefs.length).toBe(1);
+      expect(result.statements.length).toBe(1);
+    });
+    
+    test('should parse a complex program with classes and statements', () => {
+      const tokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("TestClass"),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("x"),
+        new SemiColonToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new MethodToken(),
+        new MethodNameToken("test"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new VoidTypeToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+        new IntegerTypeToken(),
+        createVar("main"),
+        new SemiColonToken(),
+        new PrintToken(),
+        new LeftParenToken(),
+        new StringToken("Hello"),
+        new RightParenToken(),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parse();
+      
+      expect(result.classDefs.length).toBe(1);
+      expect(result.statements.length).toBe(2);
+      expect(result.classDefs[0].name).toBe("TestClass");
+      expect(result.classDefs[0].varDecs.length).toBe(1);
+      expect(result.classDefs[0].methods.length).toBe(1);
+    });
+  })
+
 }
 
 );
