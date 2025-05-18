@@ -1,13 +1,55 @@
 const BaseToken = require("./BaseToken");
 
-class LeftCurlyToken extends BaseToken {}
-class RightCurlyToken extends BaseToken {}
-class LeftParenToken extends BaseToken {}
-class RightParenToken extends BaseToken {}
-class DotToken extends BaseToken {}
-class SemiColonToken extends BaseToken {}
-class CommaToken extends BaseToken {}
-class ColonToken extends BaseToken {}
+class LeftCurlyToken extends BaseToken {
+    constructor() {
+        super("{");
+    }
+}
+class RightCurlyToken extends BaseToken {
+    constructor() {
+        super("}");
+    }
+}
+class LeftParenToken extends BaseToken {
+    constructor() {
+        super("(");
+    }
+}
+class RightParenToken extends BaseToken {
+    constructor() {
+        super(")");
+    }
+}
+class DotToken extends BaseToken {
+    constructor() {
+        super(".");
+    }
+}
+class SemiColonToken extends BaseToken {
+    constructor() {
+        super(";");
+    }
+}
+class CommaToken extends BaseToken {
+    constructor() {
+        super(",");
+    }
+}
+class ColonToken extends BaseToken {
+    constructor() {
+        super(":");
+    }
+}
+class LeftBracketToken extends BaseToken {
+    constructor() {
+        super("[");
+    }
+}
+class RightBracketToken extends BaseToken {
+    constructor() {
+        super("]");
+    }
+}
 
 module.exports = {
     LeftCurlyToken,
@@ -18,4 +60,6 @@ module.exports = {
     SemiColonToken,
     CommaToken,
     ColonToken,
+    LeftBracketToken,
+    RightBracketToken
 };

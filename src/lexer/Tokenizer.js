@@ -1,13 +1,19 @@
-const { ColonToken } = require("./tokens/SymbolTokens");
-const { ClassNameTypeToken } = require("./tokens/TypeTokens");
-const { IntegerToken, StringToken } = require("./tokens/ExpressionTypeTokens");
-const VariableToken = require("./tokens/VariableToken");
 const {
+  ColonToken,
+  SemiColonToken,
+  DotToken,
+  LeftCurlyToken,
+  RightCurlyToken,
+  ClassNameTypeToken,
+  IntegerToken,
+  StringToken,
+  VariableToken,
   ClassToken,
   NewToken,
   MethodNameToken,
   ExtendToken,
-} = require("./tokens/SpecialTokens");
+  MethodToken,
+} = require("./tokens");
 const { keywordMap, symbolMap, multiCharSymbolMap } = require("../utils/Lexer");
 
 class Tokenizer {
@@ -25,21 +31,21 @@ class Tokenizer {
     return this.tokens;
   }
 
+  skipWhiteSpace() {
+    while (
+      this.offset < this.input.length &&
+      /\s/.test(this.input[this.offset])
+    ) {
+      this.offset++;
+    }
+  }
+
   nextToken() {
     this.skipWhiteSpace();
-    // End of input
     if (this.offset >= this.input.length) return null;
 
     const char = this.input[this.offset];
-    const next = this.input[this.offset + 1];
 
-    if (char === "-" && this.isDigit(next)) {
-      this.offset++;
-      const token = this.tokenizeNumber();
-      token.value = -token.value;
-      return token;
-    }
-    // Testing for numbers, strings, and words
     if (this.isLetter(char)) return this.tokenizeWord();
     if (this.isDigit(char)) return this.tokenizeNumber();
     if (char === '"') return this.tokenizeString();
@@ -51,13 +57,11 @@ class Tokenizer {
     const twoChar = this.input.slice(this.offset, this.offset + 2);
     const oneChar = this.input[this.offset];
 
-    // Multi-character symbols
     if (multiCharSymbolMap[twoChar]) {
       this.offset += 2;
       return new multiCharSymbolMap[twoChar]();
     }
 
-    // Single-character symbols
     if (symbolMap[oneChar]) {
       this.offset++;
       return new symbolMap[oneChar]();
@@ -68,6 +72,7 @@ class Tokenizer {
 
   tokenizeWord() {
     let name = "";
+    const prev = this.tokens[this.tokens.length - 1];
 
     // Read the entire word
     while (
@@ -82,19 +87,25 @@ class Tokenizer {
     if (TokenClass) return new TokenClass();
 
     // Method-like tokens (e.g. println, user-defined methods)
-    if (this.offset < this.input.length && this.input[this.offset] === "(") {
-      return new MethodNameToken(name);
-    }
-
     // Class name contexts
-    const prev = this.tokens[this.tokens.length - 1];
     if (
       prev instanceof ClassToken ||
       prev instanceof NewToken ||
       prev instanceof ColonToken ||
-      prev instanceof ExtendToken
+      prev instanceof ExtendToken ||
+      prev === undefined ||
+      prev instanceof RightCurlyToken
     ) {
       return new ClassNameTypeToken(name);
+    }
+
+    // Check for method name after dot or standalone method call
+    if (
+      prev instanceof DotToken ||
+      prev instanceof MethodToken ||
+      (this.offset < this.input.length && this.input[this.offset] === "(")
+    ) {
+      return new MethodNameToken(name);
     }
 
     return new VariableToken(name);
@@ -118,15 +129,42 @@ class Tokenizer {
 
   tokenizeString() {
     let result = "";
-    this.offset++;
+    this.offset++; // Skip opening quote
 
     while (this.offset < this.input.length) {
       const char = this.input[this.offset];
       if (char === '"') {
-        this.offset++;
+        this.offset++; // Skip closing quote
         return new StringToken(result);
       }
-      result += char;
+      if (char === "\\") {
+        this.offset++;
+        if (this.offset >= this.input.length) {
+          throw new Error("Unterminated string literal - escape sequence");
+        }
+        const nextChar = this.input[this.offset];
+        switch (nextChar) {
+          case "n":
+            result += "\n";
+            break;
+          case "t":
+            result += "\t";
+            break;
+          case "r":
+            result += "\r";
+            break;
+          case '"':
+            result += '"';
+            break;
+          case "\\":
+            result += "\\";
+            break;
+          default:
+            result += nextChar;
+        }
+      } else {
+        result += char;
+      }
       this.offset++;
     }
 
@@ -144,15 +182,5 @@ class Tokenizer {
   isDigit(char) {
     return /[0-9]/.test(char);
   }
-
-  skipWhiteSpace() {
-    while (
-      this.offset < this.input.length &&
-      /\s/.test(this.input[this.offset])
-    ) {
-      this.offset++;
-    }
-  }
 }
-
 module.exports = Tokenizer;
