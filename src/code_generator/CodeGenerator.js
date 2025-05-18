@@ -1,4 +1,9 @@
 // CodeGenerator.js
+const {generateRuntimeSupport} = require("./RuntimeSupport");
+const { generateClassDef}= require("./ClassGenerator");
+const {generateStatement} = require("./StatementGenerator");
+const {generateExpression} = require("./ExpressionGenerator");
+
 class CodeGenerator {
   constructor() {
     this.indentLevel = 0;
@@ -30,7 +35,38 @@ class CodeGenerator {
       this.appendLine.bind(this),
       this.indentLevelCallback.bind(this),
     );    
+    this.appendLine("");
 
+    for (const classDef of program.classDefs) {
+      generateClassDef(classDef, {
+        appendLine: this.appendLine.bind(this),
+        indentLevelCallback: this.indentLevelCallback.bind(this),
+        declaredVariables: this.declaredVariables,
+        classTable: this.classTable,
+        generateParams: this.generateParams.bind(this),
+        generateExpression: generateExpression.bind(this),
+        generateStatement: generateStatement.bind(this),
+      });
+      this.appendLine("");
+    }
+
+    this.appendLine("// Main Program");
+    this.appendLine("(function() {");
+    this.indentLevel++;
+
+    for (const statement of program.statements) {
+      generateStatement(statement, {
+        appendLine: this.appendLine.bind(this),
+        indent: this.indent.bind(this),
+        indentLevelCallback: this.indentLevelCallback.bind(this),
+        generateExpression: generateExpression.bind(this),
+        declaredVariables: this.declaredVariables,
+        currentClass: this.currentClass,
+      });
+    }
+
+    this.indentLevel--;
+    this.appendLine("})();");
 
     return this.output;
   }
