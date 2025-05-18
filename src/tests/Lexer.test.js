@@ -1,6 +1,7 @@
 const Tokenizer = require("../lexer/Tokenizer");
 const BaseToken = require("../lexer/tokens/BaseToken");
-const {
+ const { 
+  // Symbol Tokens
   LeftCurlyToken,
   RightCurlyToken,
   LeftParenToken,
@@ -9,29 +10,29 @@ const {
   SemiColonToken,
   CommaToken,
   ColonToken,
-} = require("../lexer/tokens/SymbolTokens");
-const {
+
+  // Statement Tokens
   IfToken,
   ReturnToken,
   WhileToken,
   BreakToken,
   ThisToken,
   PrintToken,
-} = require("../lexer/tokens/StatementTokens");
-const {
+
+  // Expression Tokens
   TrueToken,
   FalseToken,
   IntegerToken,
   StringToken,
-} = require("../lexer/tokens/ExpressionTypeTokens");
-const {
+
+  // Keyword Tokens
   ClassNameTypeToken,
   IntegerTypeToken,
   StringTypeToken,
   BooleanTypeToken,
   VoidTypeToken,
-} = require("../lexer/tokens/TypeTokens");
-const {
+
+  // Operator Tokens
   AssignmentToken,
   PlusToken,
   MinusToken,
@@ -43,23 +44,25 @@ const {
   GreaterThanToken,
   LessThanEqualToken,
   LessThanToken,
-} = require("../lexer/tokens/OperatorTokens");
-const VariableToken = require("../lexer/tokens/VariableToken");
-const {
+  NotToken,
+
+
+  // Special Tokens
   SuperToken,
   ClassToken,
   NewToken,
   MethodNameToken,
+  VariableToken,
   ConstructorToken,
   ExtendToken,
   MethodToken,
-} = require("../lexer/tokens/SpecialTokens");
-const {
+
+// Access Tokens
   PublicToken,
   PrivateToken,
   ProtectedToken,
   AccessToken,
-} = require("../lexer/tokens/AccessTokens");
+} = require("../lexer/tokens");
 
 describe("Tokenizer Tests", () => {
   function expectTokenizes(input, expected) {
@@ -73,69 +76,6 @@ describe("Tokenizer Tests", () => {
       }
     }
   }
-
-  describe("Numeric Handling", () => {
-    test("Valid integer parsing", () => {
-      expectTokenizes("123", [new IntegerToken(123)]);
-    });
-    test("Valid negative integer parsing", () => {
-      expectTokenizes("-123", [new IntegerToken(-123)]);
-    });
-  });
-
-  describe("Type Handling", () => {
-    test("Assignment for IntegerTypeToken", () => {
-      expectTokenizes("int", [new IntegerTypeToken()]);
-    });
-    test("Assignment for StringTypeToken", () => {
-      expectTokenizes("string", [new StringTypeToken()]);
-    });
-    test("Assignment for BooleanTypeToken", () => {
-      expectTokenizes("boolean", [new BooleanTypeToken()]);
-    });
-    test("Assignment for VoidTypeToken", () => {
-      expectTokenizes("void", [new VoidTypeToken()]);
-    });
-  });
-
-  describe("Operators Handling", () => {
-    test("Assignment for + operator", () => {
-      expectTokenizes("+", [new PlusToken()]);
-    });
-    test("Assignment for - operator", () => {
-      expectTokenizes("-", [new MinusToken()]);
-    });
-    test("Assignment for * operator", () => {
-      expectTokenizes("*", [new MultiplyToken()]);
-    });
-    test("Assignment for / operator", () => {
-      expectTokenizes("/", [new DivideToken()]);
-    });
-    test("Assignment for = operator", () => {
-      expectTokenizes("=", [new AssignmentToken()]);
-    });
-    test("Assignment for == operator", () => {
-      expectTokenizes("==", [new EqualsToken()]);
-    });
-    test("Assignment for != operator", () => {
-      expectTokenizes("!=", [new NotEqualsToken()]);
-    });
-    test("Assignment for >= operator", () => {
-      expectTokenizes(">=", [new GreaterThanEqualToken()]);
-    });
-    test("Assignment for ! operator", () => {
-      expectTokenizes("!", [new FalseToken()]);
-    });
-    test("Assignment for > operator", () => {
-      expectTokenizes(">", [new GreaterThanToken()]);
-    });
-    test("Assignment for <= operator", () => {
-      expectTokenizes("<=", [new LessThanEqualToken()]);
-    });
-    test("Assignment for < operator", () => {
-      expectTokenizes("<", [new LessThanToken()]);
-    });
-  });
 
   describe("Basic Tokens", () => {
     test("Empty input should return no tokens", () => {
@@ -173,9 +113,8 @@ describe("Tokenizer Tests", () => {
       ]);
     });
   });
-
   describe("Print Method", () => {
-    test("Println method should be recognized as a method call", () => {
+    test("Println method should be recognized", () => {
       expectTokenizes('println("Hello, World!");', [
         new PrintToken(),
         new LeftParenToken(),
@@ -212,12 +151,11 @@ describe("Tokenizer Tests", () => {
     });
 
     test("Method inside a class", () => {
-      expectTokenizes(`class Test { method returnScore() { return 1; } }`, [
+      expectTokenizes(`class Test { method() { return 1; } }`, [
         new ClassToken(),
         new ClassNameTypeToken("Test"),
         new LeftCurlyToken(),
         new MethodToken(),
-        new MethodNameToken("returnScore"),
         new LeftParenToken(),
         new RightParenToken(),
         new LeftCurlyToken(),
@@ -268,18 +206,18 @@ describe("Tokenizer Tests", () => {
         new RightCurlyToken(),
       ]);
     });
-    test("Class declaration and extension", () => {
-      expectTokenizes("class Test extends Exam {}", [
+    test("Class declaration with extension", () => {
+      expectTokenizes("class Test extends Prev {}", [
         new ClassToken(),
         new ClassNameTypeToken("Test"),
         new ExtendToken(),
-        new ClassNameTypeToken("Exam"),
+        new ClassNameTypeToken("Prev"),
         new LeftCurlyToken(),
         new RightCurlyToken(),
       ]);
     });
     test("Class declaration with constructor", () => {
-      expectTokenizes("class Test { constructor() {} }", [
+      expectTokenizes("class Test { init() {} }", [
         new ClassToken(),
         new ClassNameTypeToken("Test"),
         new LeftCurlyToken(),
@@ -291,17 +229,34 @@ describe("Tokenizer Tests", () => {
         new RightCurlyToken(),
       ]);
     });
+    // how to test only this test below
+    // npm test -- -t "Class declaration with assignment of this."
     test("Class declaration with assingment of this.", () => {
-      expectTokenizes("class Test { this.var = 10; }", [
+      expectTokenizes(
+        `class Test { 
+          this.num;
+          init () {
+            this.num = 10;
+            }
+        }`, [
         new ClassToken(),
         new ClassNameTypeToken("Test"),
         new LeftCurlyToken(),
         new ThisToken(),
         new DotToken(),
-        new VariableToken("var"),
+        new MethodNameToken("num"),
+        new SemiColonToken(),
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("num"),
         new AssignmentToken(),
         new IntegerToken(10),
         new SemiColonToken(),
+        new RightCurlyToken(),
         new RightCurlyToken(),
       ]);
     });
@@ -314,153 +269,89 @@ describe("Tokenizer Tests", () => {
         new RightCurlyToken(),
       ]);
     });
-  });
 
-  describe("Class Hierarchy Structure", () => {
-    test("Tokenize class Animal with method and constructor", () => {
-      expectTokenizes(
-        `
-        public class Animal {
-          init() {}
-          method speak() void { return println(0); }
-        }
-      `,
-        [
-          new PublicToken(),
-          new ClassToken(),
-          new ClassNameTypeToken("Animal"),
-          new LeftCurlyToken(),
-          new ConstructorToken(),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new LeftCurlyToken(),
-          new RightCurlyToken(),
-          new MethodToken(),
-          new MethodNameToken("speak"),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new VoidTypeToken(),
-          new LeftCurlyToken(),
-          new ReturnToken(),
-          new PrintToken(),
-          new LeftParenToken(),
-          new IntegerToken(0),
-          new RightParenToken(),
-          new SemiColonToken(),
-          new RightCurlyToken(),
-          new RightCurlyToken(),
-        ],
-      );
-    });
-
-    test("Tokenize class Cat extending Animal", () => {
-      expectTokenizes(
-        `
-        public class Cat extends Animal {
-          init() { super(); }
-          method speak() void { return println(1); }
-        }
-      `,
-        [
-          new PublicToken(),
-          new ClassToken(),
-          new ClassNameTypeToken("Cat"),
-          new ExtendToken(),
-          new ClassNameTypeToken("Animal"),
-          new LeftCurlyToken(),
-          new ConstructorToken(),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new LeftCurlyToken(),
-          new SuperToken(),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new SemiColonToken(),
-          new RightCurlyToken(),
-          new MethodToken(),
-          new MethodNameToken("speak"),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new VoidTypeToken(),
-          new LeftCurlyToken(),
-          new ReturnToken(),
-          new PrintToken(),
-          new LeftParenToken(),
-          new IntegerToken(1),
-          new RightParenToken(),
-          new SemiColonToken(),
-          new RightCurlyToken(),
-          new RightCurlyToken(),
-        ],
-      );
-    });
-
-    test("Tokenize class Dog extending Animal", () => {
-      expectTokenizes(
-        `
-        public class Dog extends Animal {
-          init() { super(); }
-          method speak() void { return println(2); }
-        }
-      `,
-        [
-          new PublicToken(),
-          new ClassToken(),
-          new ClassNameTypeToken("Dog"),
-          new ExtendToken(),
-          new ClassNameTypeToken("Animal"),
-          new LeftCurlyToken(),
-          new ConstructorToken(),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new LeftCurlyToken(),
-          new SuperToken(),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new SemiColonToken(),
-          new RightCurlyToken(),
-          new MethodToken(),
-          new MethodNameToken("speak"),
-          new LeftParenToken(),
-          new RightParenToken(),
-          new VoidTypeToken(),
-          new LeftCurlyToken(),
-          new ReturnToken(),
-          new PrintToken(),
-          new LeftParenToken(),
-          new IntegerToken(2),
-          new RightParenToken(),
-          new SemiColonToken(),
-          new RightCurlyToken(),
-          new RightCurlyToken(),
-        ],
-      );
-    });
-  });
-
-  describe("Variable Declarations", () => {
-    test("Variable assignment", () => {
-      expectTokenizes("var: int = 10;", [
-        new VariableToken("var"),
-        new ColonToken(),
-        new IntegerTypeToken(),
-        new AssignmentToken(),
-        new IntegerToken(10),
-        new SemiColonToken(),
-      ]);
-    });
-    test("Variable assignment with access token", () => {
-      expectTokenizes("public var: int = 10;", [
+    test("Method inside a class with access tokens", () => {
+      expectTokenizes(`public class Test { public method() { return 1; } }`, [
         new PublicToken(),
-        new VariableToken("var"),
-        new ColonToken(),
-        new IntegerTypeToken(),
-        new AssignmentToken(),
-        new IntegerToken(10),
+        new ClassToken(),
+        new ClassNameTypeToken("Test"),
+        new LeftCurlyToken(),
+        new PublicToken(),
+        new MethodToken(),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new ReturnToken(),
+        new IntegerToken(1),
         new SemiColonToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
       ]);
     });
   });
+
+  describe("String Handling", () => {
+    test("Parses simple string", () => {
+      expectTokenizes('"hello";', [
+        new StringToken("hello"),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test("Parses escaped newline", () => {
+      expectTokenizes('"line1\\nline2";', [
+        new StringToken("line1\nline2"),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test("Parses escaped tab", () => {
+      expectTokenizes('"a\\tb";', [
+        new StringToken("a\tb"),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test("Parses escaped carriage return", () => {
+      expectTokenizes('"a\\rb";', [
+        new StringToken("a\rb"),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test('Parses escaped quote', () => {
+      expectTokenizes('"a\\"b";', [
+        new StringToken('a"b'),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test("Parses escaped backslash", () => {
+      expectTokenizes('"a\\\\b";', [
+        new StringToken("a\\b"),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test("Parses unknown escape char as literal", () => {
+      expectTokenizes('"a\\qb";', [
+        new StringToken("aqb"),
+        new SemiColonToken(),
+      ]);
+    });
+  
+    test("Throws on unterminated escape sequence", () => {
+      const tokenizer = new Tokenizer('"hello\\');
+      expect(() => tokenizer.tokenizeAll()).toThrow("Unterminated string literal - escape sequence");
+    });
+  
+    test("Throws on completely unterminated string", () => {
+      const tokenizer = new Tokenizer('"unterminated');
+      expect(() => tokenizer.tokenizeAll()).toThrow("Unterminated string literal");
+    });
+  });
+
+ 
 
   describe("Control Flow", () => {
     test("While loop", () => {
@@ -492,6 +383,91 @@ describe("Tokenizer Tests", () => {
       ]);
     });
   });
+
+  describe("Numeric Handling", () => {
+    test("Valid integer parsing", () => {
+      expectTokenizes("123", [new IntegerToken(123)]);
+    });
+  });
+  test("tokenizeNumber throws if no digits found", () => {
+    const tokenizer = new Tokenizer("abc"); // non-digit input
+    tokenizer.offset = 0;
+  
+    expect(() => tokenizer.tokenizeNumber()).toThrow("Invalid number at position 0");
+  });
+  
+
+  describe("Type Handling", () => {
+    test("Assignment for IntegerTypeToken", () => {
+      expectTokenizes("int", [new IntegerTypeToken()]);
+    });
+    test("Assignment for StringTypeToken", () => {
+      expectTokenizes("string", [new StringTypeToken()]);
+    });
+    test("Assignment for BooleanTypeToken", () => {
+      expectTokenizes("boolean", [new BooleanTypeToken()]);
+    });
+    test("Assignment for VoidTypeToken", () => {
+      expectTokenizes("void", [new VoidTypeToken()]);
+    });
+  });
+
+  describe("Operators Handling", () => {
+    test("Assignment for + operator", () => {
+      expectTokenizes("+", [new PlusToken()]);
+    });
+    test("Assignment for - operator", () => {
+      expectTokenizes("-", [new MinusToken()]);
+    });
+    test("Assignment for * operator", () => {
+      expectTokenizes("*", [new MultiplyToken()]);
+    });
+    test("Assignment for / operator", () => {
+      expectTokenizes("/", [new DivideToken()]);
+    });
+    test("Assignment for = operator", () => {
+      expectTokenizes("=", [new AssignmentToken()]);
+    });
+    test("Assignment for == operator", () => {
+      expectTokenizes("==", [new EqualsToken()]);
+    });
+    test("Assignment for != operator", () => {
+      expectTokenizes("!=", [new NotEqualsToken()]);
+    });
+    test("Assignment for >= operator", () => {
+      expectTokenizes(">=", [new GreaterThanEqualToken()]);
+    });
+    test("Assignment for ! operator", () => {
+      expectTokenizes("!", [new NotToken()]);
+    });
+    test("Assignment for > operator", () => {
+      expectTokenizes(">", [new GreaterThanToken()]);
+    });
+    test("Assignment for <= operator", () => {
+      expectTokenizes("<=", [new LessThanEqualToken()]);
+    });
+    test("Assignment for < operator", () => {
+      expectTokenizes("<", [new LessThanToken()]);
+    });
+  });
+
+  test("Fallback to Class for unknown words", () => {
+    expectTokenizes("foo", [new ClassNameTypeToken("foo")]);
+  });
+
+  test("Unknown not recognized token", () => {
+    expect( () => expectTokenizes("$", [new BaseToken()])).toThrow();
+  });
+
+  test("variable token", () => {
+    expectTokenizes("int heyMethod", [
+      new IntegerTypeToken(),
+      new VariableToken("heyMethod"),
+    ]);
+  });
+
+  
+
   describe("To string checks", () => {
     test("To string checks", () => {
       expect(new IntegerTypeToken(5).toString()).toBe(

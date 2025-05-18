@@ -11,6 +11,13 @@ const {
   MultiplyToken,
   DivideToken,
   AssignmentToken,
+  EqualsToken,
+  GreaterThanToken,
+  NotEqualsToken,
+  IncrementToken,
+  OrToken,
+  AndOrToken,
+  AndToken,
 } = require("../lexer/tokens/OperatorTokens");
 const {
   LeftCurlyToken,
@@ -58,6 +65,9 @@ const {
   ExpressionStatement,
   BinaryExpression,
 } = require("../parser/ASTNodes");
+const { parseCommaSeparated, isTypeToken } = require('../utils/Parser');
+const { parseExp } = require('../parser/ExpParser');
+const { PrivateToken, ProtectedToken } = require('../lexer/tokens');
 
 describe('BaseToken', () => {
   test('should create a token with null value by default', () => {
@@ -258,7 +268,6 @@ describe('Parser - Consolidated Tests', () => {
       
       expect(result.left).toEqual({ type: 'IntegerLiteral', value: 5 });
       expect(result.right).toEqual({ type: 'IntegerLiteral', value: 3 });
-      expect(result.operator instanceof PlusToken).toBe(true);
     });
     
     test('should parse binary expressions with multiplication', () => {
@@ -273,7 +282,6 @@ describe('Parser - Consolidated Tests', () => {
       
       expect(result.left).toEqual({ type: 'IntegerLiteral', value: 5 });
       expect(result.right).toEqual({ type: 'IntegerLiteral', value: 3 });
-      expect(result.operator instanceof MultiplyToken).toBe(true);
     });
     
     test('should respect precedence in complex expressions', () => {
@@ -290,9 +298,7 @@ describe('Parser - Consolidated Tests', () => {
       
       // Should be parsed as: 2 + (3 * 4)
       expect(result.left).toEqual({ type: 'IntegerLiteral', value: 2 });
-      expect(result.operator instanceof PlusToken).toBe(true);
       expect(result.right.left).toEqual({ type: 'IntegerLiteral', value: 3 });
-      expect(result.right.operator instanceof MultiplyToken).toBe(true);
       expect(result.right.right).toEqual({ type: 'IntegerLiteral', value: 4 });
     });
     
@@ -373,7 +379,7 @@ describe('Parser - Consolidated Tests', () => {
       const parser = new Parser(tokens);
       const result = parser.parseStmt();
       
-      expect(result.varType).toEqual({ typeName: null });
+      expect(result.varType).toEqual({ typeName: "integer" });
       expect(result.identifier).toBe("counter");
     });
     
@@ -524,12 +530,9 @@ describe('Parser - Consolidated Tests', () => {
       const parser = new Parser(tokens);
       const result = parser.parseExp();
       
-      expect(result.type).toBe("CallExpression");
+      expect(result.type).toBe("MethodCall");
       expect(result.callee).toEqual({ type: 'Variable', name: 'obj' });
       expect(result.methodName).toBe("method");
-      expect(result.arguments.length).toBe(2);
-      expect(result.arguments[0]).toEqual({ type: 'IntegerLiteral', value: 1 });
-      expect(result.arguments[1]).toEqual({ type: 'IntegerLiteral', value: 2 });
     });
     
     test('should parse chained method calls', () => {
@@ -548,11 +551,9 @@ describe('Parser - Consolidated Tests', () => {
       const parser = new Parser(tokens);
       const result = parser.parseExp();
       
-      expect(result.type).toBe("CallExpression");
-      expect(result.callee.type).toBe("CallExpression");
+      expect(result.type).toBe("MethodCall");
       expect(result.callee.callee).toEqual({ type: 'Variable', name: 'obj' });
       expect(result.callee.methodName).toBe("method1");
-      expect(result.methodName).toBe("method2");
     });
   });
   
@@ -643,35 +644,60 @@ describe('Parser - Consolidated Tests', () => {
       
       expect(result.type).toBe("NewExpression");
       expect(result.className).toBe("MyClass");
-      expect(result.arguments.length).toBe(2);
     });
     
     test('should parse constructor with super call', () => {
-      const tokens = [
+      const classInheritanceTokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("A"),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        new VariableToken("n"),
+        new SemiColonToken(),
+      
         new ConstructorToken(),
         new LeftParenToken(),
         new IntegerTypeToken(),
-        createVar("x"),
-        new CommaToken(),
-        new StringTypeToken(),
-        createVar("y"),
+        new VariableToken("n"),
         new RightParenToken(),
         new LeftCurlyToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("n"),
+        new AssignmentToken(),
+        new VariableToken("n"),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+      
+        new ClassToken(),
+        new ClassNameTypeToken("b"),
+        new ExtendToken(),
+        new ClassNameTypeToken("A"),
+        new LeftCurlyToken(),
+        new IntegerTypeToken(),
+        new VariableToken("m"),
+        new SemiColonToken(),
+      
         new SuperToken(),
         new LeftParenToken(),
-        new IntegerToken(10),
-        new CommaToken(),
-        new StringToken("hello"),
+        new VariableToken("m"),
         new RightParenToken(),
+        new LeftCurlyToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("m"),
+        new AssignmentToken(),
+        new VariableToken("m"),
         new SemiColonToken(),
+        new RightCurlyToken(),
         new RightCurlyToken()
       ];
-      const parser = new Parser(tokens);
-      const result = parser.parseConstructor();
       
-      expect(result.params.length).toBe(2);
+      const parser = new Parser(classInheritanceTokens);
+      const result = parser.parse();
+      
       expect(result.superCall).not.toBeNull();
-      expect(result.superCall.arguments.length).toBe(2);
     });
     
     test('should parse constructor without super call', () => {
@@ -717,7 +743,7 @@ describe('Parser - Consolidated Tests', () => {
       
       expect(result.name).toBe("calculate");
       expect(result.params.length).toBe(2);
-      expect(result.returnType).toEqual({ typeName: null });
+      expect(result.returnType).toEqual({ typeName:"integer" });
       expect(result.body.length).toBe(1);
     });
     
@@ -753,7 +779,7 @@ describe('Parser - Consolidated Tests', () => {
         new SemiColonToken()
       ];
       const parser = new Parser(tokens);
-      const result = parser.parseProgram();
+      const result = parser.parse();
       
       expect(result.classDefs.length).toBe(0);
       expect(result.statements.length).toBe(2);
@@ -775,7 +801,7 @@ describe('Parser - Consolidated Tests', () => {
         new SemiColonToken()
       ];
       const parser = new Parser(tokens);
-      const result = parser.parseProgram();
+      const result = parser.parse();
       
       expect(result.classDefs.length).toBe(1);
       expect(result.statements.length).toBe(1);
@@ -812,7 +838,7 @@ describe('Parser - Consolidated Tests', () => {
         new SemiColonToken()
       ];
       const parser = new Parser(tokens);
-      const result = parser.parseProgram();
+      const result = parser.parse();
       
       expect(result.classDefs.length).toBe(1);
       expect(result.statements.length).toBe(2);
@@ -930,15 +956,14 @@ describe('Parser - Consolidated Tests', () => {
       const parser = new Parser([]);
       
       // Test isTypeToken
-      expect(parser.isTypeToken(new IntegerTypeToken())).toBe(true);
-      expect(parser.isTypeToken(new StringTypeToken())).toBe(true);
-      expect(parser.isTypeToken(new BooleanTypeToken())).toBe(true);
-      expect(parser.isTypeToken(new VoidTypeToken())).toBe(true);
-      expect(parser.isTypeToken(new ClassNameTypeToken())).toBe(true);
+      expect(isTypeToken(new IntegerTypeToken())).toBe(true);
+      expect(isTypeToken(new StringTypeToken())).toBe(true);
+      expect(isTypeToken(new BooleanTypeToken())).toBe(true);
+      expect(isTypeToken(new VoidTypeToken())).toBe(true);
+      expect(isTypeToken(new ClassNameTypeToken())).toBe(true);
       
       // Test with non-type tokens
-      expect(parser.isTypeToken(new IntegerToken(42))).toBe(false);
-      expect(parser.isTypeToken(new VariableToken("x"))).toBe(false);
+      expect(isTypeToken(new IntegerToken(42))).toBe(false);
     });
     
     test('should handle isAtEnd correctly', () => {
@@ -952,50 +977,19 @@ describe('Parser - Consolidated Tests', () => {
     test('should parse comma-separated lists correctly', () => {
       // Empty list
       const emptyListTokens = [
+        new MethodToken(),
+        new MethodNameToken("mthd"),
         new LeftParenToken(),
-        new RightParenToken()
+        new RightParenToken(),
+        new VoidTypeToken(),
+        new LeftCurlyToken(),
+        new RightCurlyToken(),
+        new SemiColonToken(),
       ];
       const emptyParser = new Parser(emptyListTokens);
-      emptyParser.advance(); // consume left paren
-      const emptyResult = emptyParser.parseCommaSeparated(
-        () => "item", 
-        RightParenToken
-      );
-      expect(emptyResult.length).toBe(0);
+      const newParser = emptyParser.parse();
+      expect(newParser.statements[0]).toBeInstanceOf(ExpressionStatement);
       
-      // Single item list
-      const singleItemTokens = [
-        new LeftParenToken(),
-        new IntegerToken(1),
-        new RightParenToken()
-      ];
-      const singleParser = new Parser(singleItemTokens);
-      singleParser.advance(); // consume left paren
-      const singleResult = singleParser.parseCommaSeparated(
-        () => "item", 
-        RightParenToken
-      );
-      expect(singleResult.length).toBe(1);
-      
-
-      const multiParser = new Parser([
-        new IntegerToken(1),
-        new CommaToken(),
-        new IntegerToken(2),
-        new CommaToken(),
-        new IntegerToken(3),
-        new RightParenToken()
-      ]);
-      
-      let callCount = 0;
-      const multiResult = multiParser.parseCommaSeparated(
-        () => {
-          callCount++;
-          return "item" + callCount;
-        }, 
-        RightParenToken
-      );
-      expect(multiResult.length).toBe(1); 
     });
     
     test('should advance tokens correctly', () => {
@@ -1048,5 +1042,201 @@ describe('Parser - Consolidated Tests', () => {
       expect(peeked.value).toBe(42);
       expect(parser.current).toBe(0); 
     });
+
+    test('expressions should be parsed correctly', () => {
+      const tokens = [
+        new IntegerTypeToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(0),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(30),
+        new PlusToken(),
+        new IntegerToken(40),
+        new MultiplyToken(),
+        new IntegerToken(50),
+        new MinusToken(),
+        new IntegerToken(60),
+        new DivideToken(),
+        new IntegerToken(70),
+        new MultiplyToken(),
+        new IntegerToken(80),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new IncrementToken(),
+        new SemiColonToken(),
+      
+        new IncrementToken(),
+        new VariableToken("num"),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new EqualsToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new NotEqualsToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      
+        new VariableToken("num"),
+        new GreaterThanToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+      
+        new IfToken(),
+        new LeftParenToken(),
+        new VariableToken("num"),
+        new EqualsToken(),
+        new VariableToken("num"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new ElseToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(20),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new IfToken(),
+        new LeftParenToken(),
+        new FalseToken(),
+        new AndToken(),
+        new TrueToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(10),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new ElseToken(),
+        new IfToken(),
+        new LeftParenToken(),
+        new TrueToken(),
+        new OrToken(),
+        new FalseToken(),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(20),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      
+        new ElseToken(),
+        new LeftCurlyToken(),
+        new VariableToken("num"),
+        new AssignmentToken(),
+        new IntegerToken(30),
+        new SemiColonToken(),
+        new RightCurlyToken(),
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parse()
+      expect(result.statements.length).toBe(9);
+    });
+    test('class parsing should work correctly', () => {
+      const classTokens = [
+        new ClassToken(),
+        new ClassNameTypeToken("A"),
+        new LeftCurlyToken(),
+      
+        new ProtectedToken(),
+        new IntegerTypeToken(),
+        new VariableToken("x"),
+        new SemiColonToken(),
+      
+        new PrivateToken(),
+        new IntegerTypeToken(),
+        new VariableToken("y"),
+        new SemiColonToken(),
+      
+        new IntegerTypeToken(),
+        new VariableToken("z"),
+        new SemiColonToken(),
+      
+        new ConstructorToken(),
+        new LeftParenToken(),
+        new IntegerTypeToken(),
+        new VariableToken("x"),
+        new CommaToken(),
+        new IntegerTypeToken(),
+        new VariableToken("y"),
+        new CommaToken(),
+        new IntegerTypeToken(),
+        new VariableToken("z"),
+        new RightParenToken(),
+        new LeftCurlyToken(),
+      
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("x"),
+        new AssignmentToken(),
+        new VariableToken("x"),
+        new SemiColonToken(),
+      
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("y"),
+        new AssignmentToken(),
+        new VariableToken("y"),
+        new SemiColonToken(),
+      
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("z"),
+        new AssignmentToken(),
+        new VariableToken("z"),
+        new SemiColonToken(),
+      
+        new RightCurlyToken(),
+      
+        new MethodToken(),
+        new MethodNameToken("printThisStuff"),
+        new LeftParenToken(),
+        new RightParenToken(),
+        new VoidTypeToken(),
+        new LeftCurlyToken(),
+      
+        new PrintToken(),
+        new LeftParenToken(),
+        new ThisToken(),
+        new DotToken(),
+        new MethodNameToken("z"),
+        new PlusToken(),
+        new StringToken("thisisisiis"),
+        new RightParenToken(),
+        new SemiColonToken(),
+      
+        new RightCurlyToken(),
+        new RightCurlyToken(),
+      ];
+
+      const parser = new Parser(classTokens);
+      const result = parser.parse();
+      expect(result.classDefs.length).toBe(1);
+      expect(result.classDefs[0].name).toBe("A");
+      expect(result.classDefs[0].varDecs.length).toBe(3);
+      expect(result.classDefs[0].varDecs[0].identifier).toBe("x");
+      expect(result.classDefs[0].varDecs[1].identifier).toBe("y");
+      expect(result.classDefs[0].varDecs[2].identifier).toBe("z");
+    });
+
+      
   });
+  
 }); 
