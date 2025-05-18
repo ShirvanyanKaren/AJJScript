@@ -221,7 +221,58 @@ describe('Parser - Consolidated Tests', () => {
     });
   });
 
+  describe('Expression Parsing', () => {
+    test('should parse integer literals', () => {
+      const tokens = [new IntegerToken(42), new SemiColonToken()];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result).toEqual({
+        type: 'IntegerLiteral',
+        value: 42
+      });
+    });
+    
+    test('should parse string literals', () => {
+      const tokens = [new StringToken("hello"), new SemiColonToken()];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result).toEqual({
+        type: 'StringLiteral',
+        value: "hello"
+      });
+    });
+    
+    test('should parse variables', () => {
+      const tokens = [createVar("x"), new SemiColonToken()];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result).toEqual({
+        type: 'Variable',
+        name: "x"
+      });
+    });
+    
+    test('should parse binary expressions with addition', () => {
+      const tokens = [
+        new IntegerToken(5),
+        new PlusToken(),
+        new IntegerToken(3),
+        new SemiColonToken()
+      ];
+      const parser = new Parser(tokens);
+      const result = parser.parseExp();
+      
+      expect(result.left).toEqual({ type: 'IntegerLiteral', value: 5 });
+      expect(result.right).toEqual({ type: 'IntegerLiteral', value: 3 });
+    });
+    
 
-  
+  })
 
-});
+
+}
+
+);
