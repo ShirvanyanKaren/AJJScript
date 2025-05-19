@@ -73,7 +73,7 @@ class Tokenizer {
   tokenizeWord() {
     let name = "";
     const prev = this.tokens[this.tokens.length - 1];
-
+  
     // Read the entire word
     while (
       this.offset < this.input.length &&
@@ -81,13 +81,12 @@ class Tokenizer {
     ) {
       name += this.input[this.offset++];
     }
-
+  
     // Keywords
     const TokenClass = keywordMap[name];
     if (TokenClass) return new TokenClass();
-
-    // Method-like tokens (e.g. println, user-defined methods)
-    // Class name contexts
+  
+    // Class name contexts (explicit)
     if (
       prev instanceof ClassToken ||
       prev instanceof NewToken ||
@@ -98,8 +97,8 @@ class Tokenizer {
     ) {
       return new ClassNameTypeToken(name);
     }
-
-    // Check for method name after dot or standalone method call
+  
+    // Check for method name after dot or method keyword
     if (
       prev instanceof DotToken ||
       prev instanceof MethodToken ||
@@ -107,9 +106,20 @@ class Tokenizer {
     ) {
       return new MethodNameToken(name);
     }
-
+  
+    const lookahead = this.input.slice(this.offset).trimStart();
+    const looksLikeVarDecl =
+      /^[a-zA-Z_][a-zA-Z0-9_]*\s*=/.test(lookahead) ||
+      /^[a-zA-Z_][a-zA-Z0-9_]*\s*;/.test(lookahead);
+  
+    if (name[0] === name[0].toUpperCase() && looksLikeVarDecl) {
+      return new ClassNameTypeToken(name);
+    }
+  
+    // Default fallback: variable name
     return new VariableToken(name);
   }
+  
 
   tokenizeNumber() {
     let number = "";

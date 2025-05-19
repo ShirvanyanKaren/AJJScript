@@ -6,6 +6,9 @@
   "scripts": {
     "test": "jest --coverage"
   },
+  "bin" : {
+    "ajj": "./ajj"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ShirvanyanKaren/AJJScript.git"

@@ -1,6 +1,6 @@
 class A {
-    protected int a;
-    private int b;
+    int a;
+    int b;
     init(int a, int b) {
         this.a = a;
         this.b = b;
@@ -23,4 +23,5 @@ class B extends A {
 }
 
 
-B b = new B(1, 2, 3);
+B a = new A(1, 2);
+a.print();

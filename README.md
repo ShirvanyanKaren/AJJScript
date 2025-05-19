@@ -205,7 +205,7 @@ Then follow these steps:
 
 ```bash
 # 1. Make the CLI script executable
-chmod +x ajj
+chmod +x ajj.js
 
 # 2. Link it globally using npm
 npm link
@@ -222,7 +222,7 @@ ajj path/to/script.ajj
 If you don't want to use `ajj <filename>`, you can run your script directly with Node:
 
 ```bash
-node ajj path/to/script.ajj
+node src/compiler.js ajj path/to/script.ajj
 ```
 
 ---

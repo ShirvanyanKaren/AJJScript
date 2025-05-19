@@ -30,6 +30,15 @@ if (process.argv.length < 3) {
     console.error('Usage: node compiler.js <file_path>');
     process.exit(1);
 }
-
+if (require.main === module) {
+    const filename = process.argv[2];
+    if (!filename) {
+        console.error('Please provide a file path to compile');
+        console.error('Usage: node compiler.js <file_path>');
+        process.exit(1);
+    }
+    const filePath = path.resolve(process.cwd(), filename);
+    compileAndRun(filePath);
+}
 
 module.exports = compileAndRun;

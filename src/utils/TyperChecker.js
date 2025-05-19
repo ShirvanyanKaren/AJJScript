@@ -12,9 +12,9 @@ function validateType(type, classTable) {
     if (actual.typeName === "null") {
       return !["int", "boolean", "void"].includes(expected.typeName);
     }
-    let current = expected.typeName
+    let current = actual.typeName
     while (current) {
-      if (current == actual.typeName) return true;
+      if (current == expected.typeName) return true;
       if (!ctx?.inheritanceMap) break;
       current = ctx.inheritanceMap.get(current);
     }

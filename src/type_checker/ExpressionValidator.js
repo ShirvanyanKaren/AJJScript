@@ -269,7 +269,7 @@ function typeCheckExpression(expr, ctx) {
   
         expr.args.forEach((arg, i) => {
           const argType = typeCheckExpression(arg, ctx);
-          const paramType = constructor.params[i].varType;
+          const paramType = constructor.params[i]?.varType || typeof argType;
           if (!isTypeCompatible(paramType, argType, ctx)) {
             throw TypeCheckerError.typeMismatch(paramType.typeName, argType.typeName, 0, 0);
           }
