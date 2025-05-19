@@ -303,6 +303,8 @@ AJJ is a minimalist, statically typed language with clear syntax and basic objec
 
 Instructors, students, and hobbyists alike may find AJJ a compelling platform for understanding what goes into building a programming language—and the many design choices that come along the way.
 
+***For code specifics, check docs/index.html*** 
+
 ---
 
 ## License

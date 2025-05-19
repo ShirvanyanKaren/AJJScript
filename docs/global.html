@@ -172,6 +172,144 @@ Entry point for the code generator module.
     
 
     
+    <h4 class="name" id="compileAndRun"><span class="type-signature"></span>compileAndRun<span class="signature">(filePath)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Compiles the given AJJScript file and runs the resulting JavaScript code.
+It goes through all compilation stages: tokenizing, parsing, type checking, and code generation.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>filePath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Path to the source file to compile and run.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="compiler.js.html">compiler.js</a>, <a href="compiler.js.html#line20">line 20</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="generateClassDef"><span class="type-signature"></span>generateClassDef<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
@@ -650,13 +788,18 @@ Handles generation of code for statements.
 
             <td class="type">
             
+                
+<span class="param-type">Object</span>
+
+
+            
             </td>
 
             
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The parser instance.</td>
         </tr>
 
     
@@ -804,13 +947,18 @@ Handles generation of code for statements.
 
             <td class="type">
             
+                
+<span class="param-type">Object</span>
+
+
+            
             </td>
 
             
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The parser instance.</td>
         </tr>
 
     
@@ -987,13 +1135,18 @@ Handles generation of code for statements.
 
             <td class="type">
             
+                
+<span class="param-type">Object</span>
+
+
+            
             </td>
 
             
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The parser instance.</td>
         </tr>
 
     
@@ -1141,13 +1294,18 @@ Handles generation of code for statements.
 
             <td class="type">
             
+                
+<span class="param-type">Object</span>
+
+
+            
             </td>
 
             
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The parser instance.</td>
         </tr>
 
     
@@ -1256,13 +1414,13 @@ Handles generation of code for statements.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Parser.html">Parser</a></li></ul><h3>Global</h3><ul><li><a href="global.html#CodeGenerator">CodeGenerator</a></li><li><a href="global.html#generateClassDef">generateClassDef</a></li><li><a href="global.html#generateCode">generateCode</a></li><li><a href="global.html#generateExpression">generateExpression</a></li><li><a href="global.html#generateStatement">generateStatement</a></li><li><a href="global.html#parseClassDef">parseClassDef</a></li><li><a href="global.html#parseConstructor">parseConstructor</a></li><li><a href="global.html#parseMethodDef">parseMethodDef</a></li><li><a href="global.html#parseVarDec">parseVarDec</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="global.html#CodeGenerator">CodeGenerator</a></li><li><a href="Parser.html">Parser</a></li><li><a href="Tokenizer.html">Tokenizer</a></li><li><a href="TypeChecker.html">TypeChecker</a></li></ul><h3>Global</h3><ul><li><a href="global.html#compileAndRun">compileAndRun</a></li><li><a href="global.html#generateClassDef">generateClassDef</a></li><li><a href="global.html#generateCode">generateCode</a></li><li><a href="global.html#generateExpression">generateExpression</a></li><li><a href="global.html#generateStatement">generateStatement</a></li><li><a href="global.html#parseClassDef">parseClassDef</a></li><li><a href="global.html#parseConstructor">parseConstructor</a></li><li><a href="global.html#parseMethodDef">parseMethodDef</a></li><li><a href="global.html#parseVarDec">parseVarDec</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 17 2025 22:19:25 GMT-0500 (Central Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun May 18 2025 21:18:27 GMT-0500 (Central Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

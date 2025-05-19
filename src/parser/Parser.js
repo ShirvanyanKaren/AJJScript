@@ -1,3 +1,8 @@
+/**
+ * @file Parser.js
+ * @description Main Parser class for the AJJ language. Converts tokens into an abstract syntax tree (AST).
+ */
+
 const {
   ClassToken,
   ClassNameTypeToken,
@@ -23,7 +28,6 @@ const {
   Print,
   TernaryExpression,
 } = require("./ASTNodes");
-
 
 const {
   parseClassDef,
@@ -51,57 +55,44 @@ const {
   parsePrimaryExp,
 } = require("./ExpParser");
 
-
 /**
  * The main Parser class for the AJJ language.
  * It processes a list of tokens into an abstract syntax tree (AST).
  */
 class Parser {
   /**
-   * Creates a new parser instance.
    * @param {BaseToken[]} tokens - The list of tokens to parse.
    */
   constructor(tokens) {
-    this.tokens = tokens;
-    this.current = 0;
+    /** @type {BaseToken[]} */
+    this.tokens = tokens; // Tokens to be parsed
+    /** @type {number} */
+    this.current = 0; // Index of the current token
   }
 
-  /**
-   * Gets the current token.
-   * @returns {BaseToken} The current token.
-   */
+  /** @returns {BaseToken} */
   peek() {
     return this.tokens[this.current];
   }
 
-  /**
-   * Checks if all tokens have been consumed.
-   * @returns {boolean} True if end of token list, false otherwise.
-   */
+  /** @returns {boolean} */
   isAtEnd() {
     return this.current >= this.tokens.length;
   }
 
-  /**
-   * Gets the previously consumed token.
-   * @returns {BaseToken} The previous token.
-   */
+  /** @returns {BaseToken} */
   previous() {
     return this.tokens[this.current - 1];
   }
 
-  /**
-   * Advances to the next token.
-   * @returns {BaseToken} The consumed token.
-   */
+  /** @returns {BaseToken} */
   advance() {
     return this.tokens[this.current++];
   }
 
   /**
-   * Checks and consumes if the next token matches any of the provided types.
-   * @param {...Function} tokenTypes - Token constructors to check.
-   * @returns {boolean} True if a match was found and consumed.
+   * @param {...Function} tokenTypes
+   * @returns {boolean}
    */
   match(...tokenTypes) {
     for (let type of tokenTypes) {
@@ -114,9 +105,8 @@ class Parser {
   }
 
   /**
-   * Checks if the next token is of a specific type.
-   * @param {Function} tokenType - The token class to check against.
-   * @returns {boolean} True if the token is of the given type.
+   * @param {Function} tokenType
+   * @returns {boolean}
    */
   check(tokenType) {
     if (this.isAtEnd()) return false;
@@ -124,11 +114,9 @@ class Parser {
   }
 
   /**
-   * Consumes a token of the expected type, or throws an error.
-   * @param {Function} tokenType - Expected token constructor.
-   * @param {string} errorMessage - Error message if not matched.
-   * @returns {BaseToken} The matched token.
-   * @throws {Error} If token does not match.
+   * @param {Function} tokenType
+   * @param {string} errorMessage
+   * @returns {BaseToken}
    */
   consume(tokenType, errorMessage) {
     if (this.check(tokenType)) {
@@ -136,11 +124,8 @@ class Parser {
     }
     throw new Error(`${errorMessage} at position ${this.current}`);
   }
-  /**
-   * Parses the entire program structure.
-   * @returns {Program} The parsed program structure.
-   */
 
+  /** @returns {Program} */
   parseProgramStructure() {
     const classDefs = [];
     const statements = [];
@@ -156,21 +141,22 @@ class Parser {
     return new Program(classDefs, statements);
   }
 
-  /**
-   * Parses the entire program.
-   * @returns {Program} The parsed program structure.
-   */
+  /** @returns {Program} */
   parse() {
     return this.parseProgramStructure();
   }
 
+  /** @returns {ClassDef} */
   parseClassDef() {
     return parseClassDef(this);
   }
+
+  /** @returns {VarDec} */
   parseVarDec() {
     return parseVarDec(this);
   }
 
+  /** @returns {{ typeName: string }} */
   parseType() {
     const token = this.advance();
     if (token instanceof ClassNameTypeToken) {
@@ -180,62 +166,83 @@ class Parser {
       typeName: token.constructor.name.replace("TypeToken", "").toLowerCase(),
     };
   }
+
+  /** @returns {Constructor} */
   parseConstructor() {
     return parseConstructor(this);
   }
 
+  /** @returns {MethodDef} */
   parseMethodDef() {
     return parseMethodDef(this);
   }
 
+  /** @returns {ExpressionStatement} */
   parseStsmt() {
     return parseStmt(this);
   }
 
+  /** @returns {ExpressionStatement} */
   parseStmt() {
     return parseStmt(this);
   }
+
+  /** @returns {ExpressionStatement} */
   parseIfStmt() {
     return parseIfStmt(this);
   }
+
+  /** @returns {ExpressionStatement} */
   parseWhileStmt() {
     return parseWhileStmt(this);
   }
+
+  /** @returns {ReturnStatement} */
   parseReturnStmt() {
     return parseReturnStmt(this);
   }
+
+  /** @returns {ExpressionStatement[]} */
   parseBlockStmt() {
     return parseBlockStmt(this);
   }
 
+  /** @returns {BinaryExpression} */
   parseComparison() {
     return parseComparison(this);
   }
 
+  /** @returns {TernaryExpression} */
   parseTernary() {
     return parseTernary(this);
   }
 
+  /** @returns {TernaryExpression} */
   parseExp() {
     return parseTernary(this);
   }
 
+  /** @returns {BinaryExpression} */
   parseAddExp() {
     return parseAddExp(this);
   }
 
+  /** @returns {UnaryExpression} */
   parseUnaryExp() {
     return parseUnaryExp(this);
   }
 
+  /** @returns {BinaryExpression} */
   parseMultExp() {
     return parseMultExp(this);
   }
 
+  /** @returns {MethodCall} */
   parseCallExp() {
     return parseCallExp(this);
   }
 
+  /** @returns {FieldAccess|This|Super|NewExpression|Print|Assignment|ReturnStatement} */
   parsePrimaryExp() {
     return parsePrimaryExp(this);
   }
