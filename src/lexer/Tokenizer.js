@@ -1,3 +1,8 @@
+/**
+ * @file Tokenizer.js
+ * @description Converts source code input into a stream of tokens used by the parser.
+ */
+
 const {
   ColonToken,
   SemiColonToken,
@@ -14,15 +19,27 @@ const {
   ExtendToken,
   MethodToken,
 } = require("./tokens");
+
 const { keywordMap, symbolMap, multiCharSymbolMap } = require("../utils/Lexer");
 
+/**
+ * The Tokenizer class reads input code and splits it into meaningful tokens.
+ * It handles identifiers, numbers, strings, symbols, and keywords.
+ */
 class Tokenizer {
+  /**
+   * @param {string} input - The raw source code string to tokenize.
+   */
   constructor(input) {
     this.input = input;
     this.offset = 0;
     this.tokens = [];
   }
 
+  /**
+   * Tokenizes the entire input string.
+   * @returns {Array<Token>} An array of tokens representing the input.
+   */
   tokenizeAll() {
     while (this.offset < this.input.length) {
       const token = this.nextToken();
@@ -31,6 +48,9 @@ class Tokenizer {
     return this.tokens;
   }
 
+  /**
+   * Skips over whitespace characters in the input.
+   */
   skipWhiteSpace() {
     while (
       this.offset < this.input.length &&
@@ -40,6 +60,10 @@ class Tokenizer {
     }
   }
 
+  /**
+   * Gets the next token from the input.
+   * @returns {Token|null}
+   */
   nextToken() {
     this.skipWhiteSpace();
     if (this.offset >= this.input.length) return null;
@@ -53,6 +77,10 @@ class Tokenizer {
     return this.tokenizeSymbol();
   }
 
+  /**
+   * Tokenizes a symbol (e.g., `{`, `;`, `:` or `==`).
+   * @returns {Token}
+   */
   tokenizeSymbol() {
     const twoChar = this.input.slice(this.offset, this.offset + 2);
     const oneChar = this.input[this.offset];
@@ -70,23 +98,27 @@ class Tokenizer {
     throw new Error(`Unexpected token at position ${this.offset}: ${oneChar}`);
   }
 
+  /**
+   * Tokenizes a word, which may be a keyword, class name, method name, or variable.
+   * @returns {Token}
+   */
   tokenizeWord() {
     let name = "";
     const prev = this.tokens[this.tokens.length - 1];
-  
-    // Read the entire word
+
+    // Read the full word
     while (
       this.offset < this.input.length &&
       this.isLetterOrDigit(this.input[this.offset])
     ) {
       name += this.input[this.offset++];
     }
-  
-    // Keywords
+
+    // Check if it's a keyword (like class, new, method)
     const TokenClass = keywordMap[name];
     if (TokenClass) return new TokenClass();
-  
-    // Class name contexts (explicit)
+
+    // Class name context (e.g., after 'class', 'new', or ':')
     if (
       prev instanceof ClassToken ||
       prev instanceof NewToken ||
@@ -97,8 +129,8 @@ class Tokenizer {
     ) {
       return new ClassNameTypeToken(name);
     }
-  
-    // Check for method name after dot or method keyword
+
+    // Method name context (e.g., after a dot or 'method' keyword)
     if (
       prev instanceof DotToken ||
       prev instanceof MethodToken ||
@@ -106,21 +138,25 @@ class Tokenizer {
     ) {
       return new MethodNameToken(name);
     }
-  
+
+    // Lookahead for class-type variable declarations
     const lookahead = this.input.slice(this.offset).trimStart();
     const looksLikeVarDecl =
       /^[a-zA-Z_][a-zA-Z0-9_]*\s*=/.test(lookahead) ||
       /^[a-zA-Z_][a-zA-Z0-9_]*\s*;/.test(lookahead);
-  
+
     if (name[0] === name[0].toUpperCase() && looksLikeVarDecl) {
       return new ClassNameTypeToken(name);
     }
-  
-    // Default fallback: variable name
+
+    // Default to variable token
     return new VariableToken(name);
   }
-  
 
+  /**
+   * Tokenizes a number literal.
+   * @returns {IntegerToken}
+   */
   tokenizeNumber() {
     let number = "";
     while (
@@ -137,6 +173,10 @@ class Tokenizer {
     return new IntegerToken(parseInt(number, 10));
   }
 
+  /**
+   * Tokenizes a string literal, handling escape sequences.
+   * @returns {StringToken}
+   */
   tokenizeString() {
     let result = "";
     this.offset++; // Skip opening quote
@@ -181,16 +221,32 @@ class Tokenizer {
     throw new Error("Unterminated string literal");
   }
 
+  /**
+   * Checks if a character is a letter (a-z or A-Z).
+   * @param {string} char
+   * @returns {boolean}
+   */
   isLetter(char) {
     return /[a-zA-Z]/.test(char);
   }
 
+  /**
+   * Checks if a character is a letter or digit.
+   * @param {string} char
+   * @returns {boolean}
+   */
   isLetterOrDigit(char) {
     return /[a-zA-Z0-9]/.test(char);
   }
 
+  /**
+   * Checks if a character is a digit (0-9).
+   * @param {string} char
+   * @returns {boolean}
+   */
   isDigit(char) {
     return /[0-9]/.test(char);
   }
 }
+
 module.exports = Tokenizer;
